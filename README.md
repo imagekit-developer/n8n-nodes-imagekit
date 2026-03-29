@@ -27,7 +27,7 @@ ImageKit is a complete media management solution that provides real-time image a
 - [x] Saved extensions management (create, update, list, get, delete)
 
 ### Testing & Quality
-- [ ] Unit tests implementation
+- [x] Unit tests implementation
 - [ ] Integration tests with ImageKit API
 - [ ] Error handling improvements
 - [ ] Input validation enhancements
