@@ -18,7 +18,7 @@ export const fileCopyDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The full path of the file to copy (e.g. /path/to/file.jpg).',
+		description: 'The full path of the file to copy (e.g. /path/to/file.jpg)',
 		displayOptions: { show: showOnlyForFileCopy },
 	},
 	{
@@ -27,7 +27,7 @@ export const fileCopyDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The folder path where the file should be copied to.',
+		description: 'The folder path where the file should be copied to',
 		displayOptions: { show: showOnlyForFileCopy },
 	},
 	{
@@ -35,7 +35,7 @@ export const fileCopyDescription: INodeProperties[] = [
 		name: 'includeFileVersions',
 		type: 'boolean',
 		default: false,
-		description: 'Whether to copy all file versions.',
+		description: 'Whether to copy all file versions',
 		displayOptions: { show: showOnlyForFileCopy },
 	},
 ];

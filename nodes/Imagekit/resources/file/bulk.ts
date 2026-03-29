@@ -33,7 +33,7 @@ export const fileBulkDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'Comma-separated list of file IDs to delete.',
+		description: 'Comma-separated list of file IDs to delete',
 		displayOptions: { show: showOnlyForBulkDelete },
 	},
 	{
@@ -42,7 +42,7 @@ export const fileBulkDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'Comma-separated list of file IDs to add tags to.',
+		description: 'Comma-separated list of file IDs to add tags to',
 		displayOptions: { show: showOnlyForBulkAddTags },
 	},
 	{
@@ -51,7 +51,7 @@ export const fileBulkDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'Comma-separated list of tags to add.',
+		description: 'Comma-separated list of tags to add',
 		displayOptions: { show: showOnlyForBulkAddTags },
 	},
 	{
@@ -60,7 +60,7 @@ export const fileBulkDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'Comma-separated list of file IDs to remove tags from.',
+		description: 'Comma-separated list of file IDs to remove tags from',
 		displayOptions: { show: showOnlyForBulkRemoveTags },
 	},
 	{
@@ -69,7 +69,7 @@ export const fileBulkDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'Comma-separated list of tags to remove.',
+		description: 'Comma-separated list of tags to remove',
 		displayOptions: { show: showOnlyForBulkRemoveTags },
 	},
 	{
@@ -78,7 +78,7 @@ export const fileBulkDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'Comma-separated list of file IDs to remove AI tags from.',
+		description: 'Comma-separated list of file IDs to remove AI tags from',
 		displayOptions: { show: showOnlyForBulkRemoveAITags },
 	},
 	{
@@ -87,7 +87,7 @@ export const fileBulkDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'Comma-separated list of AI tags to remove.',
+		description: 'Comma-separated list of AI tags to remove',
 		displayOptions: { show: showOnlyForBulkRemoveAITags },
 	},
 ];

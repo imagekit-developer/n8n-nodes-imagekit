@@ -18,7 +18,7 @@ export const fileGetDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The unique ID of the file.',
+		description: 'The unique ID of the file',
 		displayOptions: { show: showOnlyForFileGet },
 	},
 ];

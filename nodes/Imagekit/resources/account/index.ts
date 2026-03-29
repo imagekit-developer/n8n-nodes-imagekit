@@ -27,7 +27,7 @@ export const accountDescription: INodeProperties[] = [
 				name: 'Get Usage',
 				value: 'getUsage',
 				action: 'Get account usage',
-				description: 'Get account usage statistics.',
+				description: 'Get account usage statistics',
 			},
 		],
 		default: 'getUsage',
@@ -39,7 +39,7 @@ export const accountDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		placeholder: 'YYYY-MM-DD',
-		description: 'Start date for the usage period (format: YYYY-MM-DD).',
+		description: 'Start date for the usage period (format: YYYY-MM-DD)',
 		displayOptions: { show: showOnlyForAccountGetUsage },
 	},
 	{
@@ -49,7 +49,7 @@ export const accountDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		placeholder: 'YYYY-MM-DD',
-		description: 'End date for the usage period (format: YYYY-MM-DD).',
+		description: 'End date for the usage period (format: YYYY-MM-DD)',
 		displayOptions: { show: showOnlyForAccountGetUsage },
 	},
 ];

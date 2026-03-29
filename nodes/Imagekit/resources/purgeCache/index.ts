@@ -32,13 +32,13 @@ export const purgeCacheDescription: INodeProperties[] = [
 				name: 'Purge',
 				value: 'purge',
 				action: 'Purge cache',
-				description: 'Purge cache for a file URL.',
+				description: 'Purge cache for a file URL',
 			},
 			{
 				name: 'Get Purge Status',
 				value: 'getStatus',
 				action: 'Get purge status',
-				description: 'Get the status of a purge request.',
+				description: 'Get the status of a purge request',
 			},
 		],
 		default: 'purge',
@@ -49,7 +49,7 @@ export const purgeCacheDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The URL of the file to purge from cache.',
+		description: 'The URL of the file to purge from cache',
 		displayOptions: { show: showOnlyForPurgeCachePurge },
 	},
 	{
@@ -58,7 +58,7 @@ export const purgeCacheDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The request ID returned from a purge request.',
+		description: 'The request ID returned from a purge request',
 		displayOptions: { show: showOnlyForPurgeCacheGetStatus },
 	},
 ];

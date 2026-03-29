@@ -42,25 +42,25 @@ export const customMetadataFieldsDescription: INodeProperties[] = [
 				name: 'Create',
 				value: 'create',
 				action: 'Create a custom metadata field',
-				description: 'Create a new custom metadata field.',
+				description: 'Create a new custom metadata field',
 			},
 			{
 				name: 'Update',
 				value: 'update',
 				action: 'Update a custom metadata field',
-				description: 'Update an existing custom metadata field.',
+				description: 'Update an existing custom metadata field',
 			},
 			{
 				name: 'List',
 				value: 'list',
 				action: 'List custom metadata fields',
-				description: 'List all custom metadata fields.',
+				description: 'List all custom metadata fields',
 			},
 			{
 				name: 'Delete',
 				value: 'delete',
 				action: 'Delete a custom metadata field',
-				description: 'Delete a custom metadata field.',
+				description: 'Delete a custom metadata field',
 			},
 		],
 		default: 'list',
@@ -72,7 +72,7 @@ export const customMetadataFieldsDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The name of the custom metadata field.',
+		description: 'The name of the custom metadata field',
 		displayOptions: { show: showOnlyForCustomMetadataFieldsCreate },
 	},
 	{
@@ -81,7 +81,7 @@ export const customMetadataFieldsDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The label of the custom metadata field.',
+		description: 'The label of the custom metadata field',
 		displayOptions: { show: showOnlyForCustomMetadataFieldsCreate },
 	},
 	{
@@ -100,7 +100,7 @@ export const customMetadataFieldsDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The ID of the custom metadata field to update.',
+		description: 'The ID of the custom metadata field to update',
 		displayOptions: { show: showOnlyForCustomMetadataFieldsUpdate },
 	},
 	{
@@ -109,7 +109,7 @@ export const customMetadataFieldsDescription: INodeProperties[] = [
 		type: 'json',
 		required: true,
 		default: '{}',
-		description: 'JSON object with fields to update (e.g. label, schema).',
+		description: 'JSON object with fields to update (e.g. label, schema)',
 		displayOptions: { show: showOnlyForCustomMetadataFieldsUpdate },
 	},
 	// List
@@ -118,7 +118,7 @@ export const customMetadataFieldsDescription: INodeProperties[] = [
 		name: 'includeDeleted',
 		type: 'boolean',
 		default: false,
-		description: 'Whether to include deleted custom metadata fields.',
+		description: 'Whether to include deleted custom metadata fields',
 		displayOptions: { show: showOnlyForCustomMetadataFieldsList },
 	},
 	// Delete
@@ -128,7 +128,7 @@ export const customMetadataFieldsDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The ID of the custom metadata field to delete.',
+		description: 'The ID of the custom metadata field to delete',
 		displayOptions: { show: showOnlyForCustomMetadataFieldsDelete },
 	},
 ];

@@ -42,25 +42,25 @@ export const fileVersionDescription: INodeProperties[] = [
 				name: 'List',
 				value: 'list',
 				action: 'List file versions',
-				description: 'List all versions of a file.',
+				description: 'List all versions of a file',
 			},
 			{
 				name: 'Get',
 				value: 'get',
 				action: 'Get a file version',
-				description: 'Get a specific version of a file.',
+				description: 'Get a specific version of a file',
 			},
 			{
 				name: 'Delete',
 				value: 'delete',
 				action: 'Delete a file version',
-				description: 'Delete a specific version of a file.',
+				description: 'Delete a specific version of a file',
 			},
 			{
 				name: 'Restore',
 				value: 'restore',
 				action: 'Restore a file version',
-				description: 'Restore a specific version of a file.',
+				description: 'Restore a specific version of a file',
 			},
 		],
 		default: 'list',
@@ -71,7 +71,7 @@ export const fileVersionDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The unique ID of the file.',
+		description: 'The unique ID of the file',
 		displayOptions: { show: showOnlyForFileVersionList },
 	},
 	{
@@ -80,7 +80,7 @@ export const fileVersionDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The unique ID of the file.',
+		description: 'The unique ID of the file',
 		displayOptions: { show: showOnlyForFileVersionGet },
 	},
 	{
@@ -89,7 +89,7 @@ export const fileVersionDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The version ID to retrieve.',
+		description: 'The version ID to retrieve',
 		displayOptions: { show: showOnlyForFileVersionGet },
 	},
 	{
@@ -98,7 +98,7 @@ export const fileVersionDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The unique ID of the file.',
+		description: 'The unique ID of the file',
 		displayOptions: { show: showOnlyForFileVersionDelete },
 	},
 	{
@@ -107,7 +107,7 @@ export const fileVersionDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The version ID to delete.',
+		description: 'The version ID to delete',
 		displayOptions: { show: showOnlyForFileVersionDelete },
 	},
 	{
@@ -116,7 +116,7 @@ export const fileVersionDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The unique ID of the file.',
+		description: 'The unique ID of the file',
 		displayOptions: { show: showOnlyForFileVersionRestore },
 	},
 	{
@@ -125,7 +125,7 @@ export const fileVersionDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The version ID to restore.',
+		description: 'The version ID to restore',
 		displayOptions: { show: showOnlyForFileVersionRestore },
 	},
 ];

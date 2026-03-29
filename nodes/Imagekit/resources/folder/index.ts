@@ -49,40 +49,40 @@ export const folderDescription: INodeProperties[] = [
 		displayOptions: { show: showOnlyForFolder },
 		options: [
 			{
+				name: 'Copy',
+				value: 'copy',
+				action: 'Copy a folder',
+				description: 'Copy a folder to another location',
+			},
+			{
 				name: 'Create',
 				value: 'create',
 				action: 'Create a folder',
-				description: 'Create a new folder.',
+				description: 'Create a new folder',
 			},
 			{
 				name: 'Delete',
 				value: 'delete',
 				action: 'Delete a folder',
-				description: 'Delete a folder.',
-			},
-			{
-				name: 'Copy',
-				value: 'copy',
-				action: 'Copy a folder',
-				description: 'Copy a folder to another location.',
-			},
-			{
-				name: 'Move',
-				value: 'move',
-				action: 'Move a folder',
-				description: 'Move a folder to another location.',
-			},
-			{
-				name: 'Rename',
-				value: 'rename',
-				action: 'Rename a folder',
-				description: 'Rename a folder.',
+				description: 'Delete a folder',
 			},
 			{
 				name: 'Get Job Status',
 				value: 'getJobStatus',
 				action: 'Get bulk job status',
-				description: 'Get the status of a bulk folder operation job.',
+				description: 'Get the status of a bulk folder operation job',
+			},
+			{
+				name: 'Move',
+				value: 'move',
+				action: 'Move a folder',
+				description: 'Move a folder to another location',
+			},
+			{
+				name: 'Rename',
+				value: 'rename',
+				action: 'Rename a folder',
+				description: 'Rename a folder',
 			},
 		],
 		default: 'create',
@@ -94,7 +94,7 @@ export const folderDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The name of the folder to create.',
+		description: 'The name of the folder to create',
 		displayOptions: { show: showOnlyForFolderCreate },
 	},
 	{
@@ -103,7 +103,7 @@ export const folderDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '/',
-		description: 'The path of the parent folder (e.g. /path/to/parent).',
+		description: 'The path of the parent folder (e.g. /path/to/parent)',
 		displayOptions: { show: showOnlyForFolderCreate },
 	},
 	// Delete
@@ -113,7 +113,7 @@ export const folderDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The full path of the folder to delete.',
+		description: 'The full path of the folder to delete',
 		displayOptions: { show: showOnlyForFolderDelete },
 	},
 	// Copy
@@ -123,7 +123,7 @@ export const folderDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The full path of the folder to copy.',
+		description: 'The full path of the folder to copy',
 		displayOptions: { show: showOnlyForFolderCopy },
 	},
 	{
@@ -132,7 +132,7 @@ export const folderDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The destination folder path.',
+		description: 'The destination folder path',
 		displayOptions: { show: showOnlyForFolderCopy },
 	},
 	// Move
@@ -142,7 +142,7 @@ export const folderDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The full path of the folder to move.',
+		description: 'The full path of the folder to move',
 		displayOptions: { show: showOnlyForFolderMove },
 	},
 	{
@@ -151,7 +151,7 @@ export const folderDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The destination folder path.',
+		description: 'The destination folder path',
 		displayOptions: { show: showOnlyForFolderMove },
 	},
 	// Rename
@@ -161,7 +161,7 @@ export const folderDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The full path of the folder to rename.',
+		description: 'The full path of the folder to rename',
 		displayOptions: { show: showOnlyForFolderRename },
 	},
 	{
@@ -170,7 +170,7 @@ export const folderDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The new name for the folder.',
+		description: 'The new name for the folder',
 		displayOptions: { show: showOnlyForFolderRename },
 	},
 	{
@@ -178,7 +178,7 @@ export const folderDescription: INodeProperties[] = [
 		name: 'purgeCache',
 		type: 'boolean',
 		default: true,
-		description: 'Whether to purge CDN cache for the old folder path.',
+		description: 'Whether to purge CDN cache for the old folder path',
 		displayOptions: { show: showOnlyForFolderRename },
 	},
 	// Get Job Status
@@ -188,7 +188,7 @@ export const folderDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The ID of the bulk job to check status for.',
+		description: 'The ID of the bulk job to check status for',
 		displayOptions: { show: showOnlyForFolderGetJobStatus },
 	},
 ];

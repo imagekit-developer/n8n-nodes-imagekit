@@ -4,7 +4,7 @@ import type {
 	INodeExecutionData,
 	IExecuteFunctions,
 } from 'n8n-workflow';
-import { NodeConnectionType } from 'n8n-workflow';
+import { NodeConnectionType, NodeOperationError } from 'n8n-workflow';
 import { assetDescription, executeAsset } from './resources/asset';
 import { fileDescription, executeFile } from './resources/file';
 import { fileVersionDescription, executeFileVersion } from './resources/fileVersion';
@@ -63,7 +63,7 @@ export class Imagekit implements INodeType {
 						value: 'asset',
 					},
 					{
-						name: 'Custom Metadata Fields',
+						name: 'Custom Metadata Field',
 						value: 'customMetadataFields',
 					},
 					{
@@ -172,7 +172,7 @@ export class Imagekit implements INodeType {
                         break;
                     }
                     default:
-                        throw new Error(`Unsupported resource: ${resource}`);
+                        throw new NodeOperationError(this.getNode(), `Unsupported resource: ${resource}`);
                 }
             } catch (error) {
                 if (this.continueOnFail()) {

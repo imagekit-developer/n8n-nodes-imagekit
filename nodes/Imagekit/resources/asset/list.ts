@@ -18,36 +18,36 @@ export const assetListDescription: INodeProperties[] = [
 		type: 'options',
 		options: [
 			{
-				name: 'Name',
-				value: 'name',
-			},
-			{
 				name: 'Created At',
 				value: 'created',
-			},
-			{
-				name: 'Updated At',
-				value: 'updated',
 			},
 			{
 				name: 'Height',
 				value: 'height',
 			},
 			{
-				name: 'Width',
-				value: 'width',
+				name: 'Name',
+				value: 'name',
+			},
+			{
+				name: 'Relevance',
+				value: 'relevance',
 			},
 			{
 				name: 'Size',
 				value: 'size',
 			},
 			{
-				name: 'Relevance',
-				value: 'relevance',
+				name: 'Updated At',
+				value: 'updated',
+			},
+			{
+				name: 'Width',
+				value: 'width',
 			},
 		],
 		default: 'created',
-		description: 'Field to sort the results by.',
+		description: 'Field to sort the results by',
 	    displayOptions: { show: showOnlyForAssetList },
 	},
 	{
@@ -65,7 +65,7 @@ export const assetListDescription: INodeProperties[] = [
 			},
 		],
 		default: 'asc',
-		description: 'Direction to sort the results.',
+		description: 'Direction to sort the results',
 	    displayOptions: { show: showOnlyForAssetList },
 	},
 	{
@@ -77,8 +77,8 @@ export const assetListDescription: INodeProperties[] = [
 			maxValue: 1000,
 		},
 		displayOptions: { show: showOnlyForAssetList },
-		default: 1000,
-		description: 'The maximum number of results to return.',
+		default: 50,
+		description: 'Max number of results to return',
 	},
 	{
 		displayName: 'Skip',
@@ -89,7 +89,7 @@ export const assetListDescription: INodeProperties[] = [
 		},
 		displayOptions: { show: showOnlyForAssetList },
 		default: 0,
-		description: 'The number of results to skip.',
+		description: 'The number of results to skip',
 	},
 	{
 		displayName: 'Additional Options',
@@ -104,7 +104,7 @@ export const assetListDescription: INodeProperties[] = [
 				name: 'path',
 				type: 'string',
 				default: '',
-				description: 'The path of the file to list.',
+				description: 'The path of the file to list',
 			},
 			{
 				displayName: 'File Type',
@@ -125,7 +125,7 @@ export const assetListDescription: INodeProperties[] = [
 					},
 				],
 				default: 'all',
-				description: 'Type of files to include in the result set.',
+				description: 'Type of files to include in the result set',
 			},
 			{
 				displayName: 'Asset Type',
@@ -150,7 +150,7 @@ export const assetListDescription: INodeProperties[] = [
 					}
 				],
 				default: 'all',
-				description: 'Type of assets to include in the result set.',
+				description: 'Type of assets to include in the result set',
 			},
 		],
 	},

@@ -18,7 +18,7 @@ export const fileMoveDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The full path of the file to move (e.g. /path/to/file.jpg).',
+		description: 'The full path of the file to move (e.g. /path/to/file.jpg)',
 		displayOptions: { show: showOnlyForFileMove },
 	},
 	{
@@ -27,7 +27,7 @@ export const fileMoveDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The folder path where the file should be moved to.',
+		description: 'The folder path where the file should be moved to',
 		displayOptions: { show: showOnlyForFileMove },
 	},
 ];

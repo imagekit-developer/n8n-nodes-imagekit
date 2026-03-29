@@ -18,7 +18,7 @@ export const fileRenameDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The full path of the file to rename (e.g. /path/to/file.jpg).',
+		description: 'The full path of the file to rename (e.g. /path/to/file.jpg)',
 		displayOptions: { show: showOnlyForFileRename },
 	},
 	{
@@ -27,7 +27,7 @@ export const fileRenameDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The new name for the file.',
+		description: 'The new name for the file',
 		displayOptions: { show: showOnlyForFileRename },
 	},
 	{
@@ -35,7 +35,7 @@ export const fileRenameDescription: INodeProperties[] = [
 		name: 'purgeCache',
 		type: 'boolean',
 		default: true,
-		description: 'Whether to purge CDN cache for the old file URL.',
+		description: 'Whether to purge CDN cache for the old file URL',
 		displayOptions: { show: showOnlyForFileRename },
 	},
 ];

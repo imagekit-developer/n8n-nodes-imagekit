@@ -18,7 +18,7 @@ export const fileDeleteDescription: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		description: 'The unique ID of the file to delete.',
+		description: 'The unique ID of the file to delete',
 		displayOptions: { show: showOnlyForFileDelete },
 	},
 ];
