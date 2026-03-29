@@ -1,0 +1,198 @@
+import type {
+	IDataObject,
+	IExecuteFunctions,
+	IHttpRequestOptions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
+
+const showOnlyForCustomMetadataFields = {
+	resource: ['customMetadataFields'],
+};
+
+const showOnlyForCustomMetadataFieldsCreate = {
+	operation: ['create'],
+	resource: ['customMetadataFields'],
+};
+
+const showOnlyForCustomMetadataFieldsUpdate = {
+	operation: ['update'],
+	resource: ['customMetadataFields'],
+};
+
+const showOnlyForCustomMetadataFieldsList = {
+	operation: ['list'],
+	resource: ['customMetadataFields'],
+};
+
+const showOnlyForCustomMetadataFieldsDelete = {
+	operation: ['delete'],
+	resource: ['customMetadataFields'],
+};
+
+export const customMetadataFieldsDescription: INodeProperties[] = [
+	{
+		displayName: 'Operation',
+		name: 'operation',
+		type: 'options',
+		noDataExpression: true,
+		displayOptions: { show: showOnlyForCustomMetadataFields },
+		options: [
+			{
+				name: 'Create',
+				value: 'create',
+				action: 'Create a custom metadata field',
+				description: 'Create a new custom metadata field.',
+			},
+			{
+				name: 'Update',
+				value: 'update',
+				action: 'Update a custom metadata field',
+				description: 'Update an existing custom metadata field.',
+			},
+			{
+				name: 'List',
+				value: 'list',
+				action: 'List custom metadata fields',
+				description: 'List all custom metadata fields.',
+			},
+			{
+				name: 'Delete',
+				value: 'delete',
+				action: 'Delete a custom metadata field',
+				description: 'Delete a custom metadata field.',
+			},
+		],
+		default: 'list',
+	},
+	// Create
+	{
+		displayName: 'Name',
+		name: 'fieldName',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The name of the custom metadata field.',
+		displayOptions: { show: showOnlyForCustomMetadataFieldsCreate },
+	},
+	{
+		displayName: 'Label',
+		name: 'label',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The label of the custom metadata field.',
+		displayOptions: { show: showOnlyForCustomMetadataFieldsCreate },
+	},
+	{
+		displayName: 'Schema (JSON)',
+		name: 'schema',
+		type: 'json',
+		required: true,
+		default: '{"type": "Text"}',
+		description: 'The schema of the custom metadata field as a JSON object. Must include a "type" property.',
+		displayOptions: { show: showOnlyForCustomMetadataFieldsCreate },
+	},
+	// Update
+	{
+		displayName: 'Field ID',
+		name: 'fieldId',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The ID of the custom metadata field to update.',
+		displayOptions: { show: showOnlyForCustomMetadataFieldsUpdate },
+	},
+	{
+		displayName: 'Update Fields (JSON)',
+		name: 'updateBody',
+		type: 'json',
+		required: true,
+		default: '{}',
+		description: 'JSON object with fields to update (e.g. label, schema).',
+		displayOptions: { show: showOnlyForCustomMetadataFieldsUpdate },
+	},
+	// List
+	{
+		displayName: 'Include Deleted',
+		name: 'includeDeleted',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to include deleted custom metadata fields.',
+		displayOptions: { show: showOnlyForCustomMetadataFieldsList },
+	},
+	// Delete
+	{
+		displayName: 'Field ID',
+		name: 'fieldId',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The ID of the custom metadata field to delete.',
+		displayOptions: { show: showOnlyForCustomMetadataFieldsDelete },
+	},
+];
+
+export async function executeCustomMetadataFields(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
+	const operation = this.getNodeParameter('operation', i) as string;
+
+	let options: IHttpRequestOptions;
+
+	switch (operation) {
+		case 'create': {
+			const name = this.getNodeParameter('fieldName', i) as string;
+			const label = this.getNodeParameter('label', i) as string;
+			const schema = JSON.parse(this.getNodeParameter('schema', i) as string);
+			options = {
+				method: 'POST',
+				baseURL: 'https://api.imagekit.io',
+				url: '/v1/customMetadataFields',
+				body: { name, label, schema },
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'update': {
+			const fieldId = this.getNodeParameter('fieldId', i) as string;
+			const updateBody = JSON.parse(this.getNodeParameter('updateBody', i) as string);
+			options = {
+				method: 'PATCH',
+				baseURL: 'https://api.imagekit.io',
+				url: `/v1/customMetadataFields/${fieldId}`,
+				body: updateBody,
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'list': {
+			const includeDeleted = this.getNodeParameter('includeDeleted', i) as boolean;
+			const qs: IDataObject = {};
+			if (includeDeleted) {
+				qs.includeDeleted = true;
+			}
+			options = {
+				method: 'GET',
+				baseURL: 'https://api.imagekit.io',
+				url: '/v1/customMetadataFields',
+				qs,
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			if (Array.isArray(responseData)) {
+				return this.helpers.returnJsonArray(responseData as IDataObject[]);
+			}
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'delete': {
+			const fieldId = this.getNodeParameter('fieldId', i) as string;
+			options = {
+				method: 'DELETE',
+				baseURL: 'https://api.imagekit.io',
+				url: `/v1/customMetadataFields/${fieldId}`,
+			};
+			await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: { success: true, fieldId } as IDataObject }];
+		}
+		default:
+			throw new Error(`Unsupported custom metadata fields operation: ${operation}`);
+	}
+}

@@ -1,0 +1,275 @@
+import type {
+	IDataObject,
+	IExecuteFunctions,
+	IHttpRequestOptions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
+
+const showOnlyForFolder = {
+	resource: ['folder'],
+};
+
+const showOnlyForFolderCreate = {
+	operation: ['create'],
+	resource: ['folder'],
+};
+
+const showOnlyForFolderDelete = {
+	operation: ['delete'],
+	resource: ['folder'],
+};
+
+const showOnlyForFolderCopy = {
+	operation: ['copy'],
+	resource: ['folder'],
+};
+
+const showOnlyForFolderMove = {
+	operation: ['move'],
+	resource: ['folder'],
+};
+
+const showOnlyForFolderRename = {
+	operation: ['rename'],
+	resource: ['folder'],
+};
+
+const showOnlyForFolderGetJobStatus = {
+	operation: ['getJobStatus'],
+	resource: ['folder'],
+};
+
+export const folderDescription: INodeProperties[] = [
+	{
+		displayName: 'Operation',
+		name: 'operation',
+		type: 'options',
+		noDataExpression: true,
+		displayOptions: { show: showOnlyForFolder },
+		options: [
+			{
+				name: 'Create',
+				value: 'create',
+				action: 'Create a folder',
+				description: 'Create a new folder.',
+			},
+			{
+				name: 'Delete',
+				value: 'delete',
+				action: 'Delete a folder',
+				description: 'Delete a folder.',
+			},
+			{
+				name: 'Copy',
+				value: 'copy',
+				action: 'Copy a folder',
+				description: 'Copy a folder to another location.',
+			},
+			{
+				name: 'Move',
+				value: 'move',
+				action: 'Move a folder',
+				description: 'Move a folder to another location.',
+			},
+			{
+				name: 'Rename',
+				value: 'rename',
+				action: 'Rename a folder',
+				description: 'Rename a folder.',
+			},
+			{
+				name: 'Get Job Status',
+				value: 'getJobStatus',
+				action: 'Get bulk job status',
+				description: 'Get the status of a bulk folder operation job.',
+			},
+		],
+		default: 'create',
+	},
+	// Create
+	{
+		displayName: 'Folder Name',
+		name: 'folderName',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The name of the folder to create.',
+		displayOptions: { show: showOnlyForFolderCreate },
+	},
+	{
+		displayName: 'Parent Folder Path',
+		name: 'parentFolderPath',
+		type: 'string',
+		required: true,
+		default: '/',
+		description: 'The path of the parent folder (e.g. /path/to/parent).',
+		displayOptions: { show: showOnlyForFolderCreate },
+	},
+	// Delete
+	{
+		displayName: 'Folder Path',
+		name: 'folderPath',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The full path of the folder to delete.',
+		displayOptions: { show: showOnlyForFolderDelete },
+	},
+	// Copy
+	{
+		displayName: 'Source Folder Path',
+		name: 'sourceFolderPath',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The full path of the folder to copy.',
+		displayOptions: { show: showOnlyForFolderCopy },
+	},
+	{
+		displayName: 'Destination Path',
+		name: 'destinationPath',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The destination folder path.',
+		displayOptions: { show: showOnlyForFolderCopy },
+	},
+	// Move
+	{
+		displayName: 'Source Folder Path',
+		name: 'sourceFolderPath',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The full path of the folder to move.',
+		displayOptions: { show: showOnlyForFolderMove },
+	},
+	{
+		displayName: 'Destination Path',
+		name: 'destinationPath',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The destination folder path.',
+		displayOptions: { show: showOnlyForFolderMove },
+	},
+	// Rename
+	{
+		displayName: 'Source Folder Path',
+		name: 'sourceFolderPath',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The full path of the folder to rename.',
+		displayOptions: { show: showOnlyForFolderRename },
+	},
+	{
+		displayName: 'New Folder Name',
+		name: 'newFolderName',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The new name for the folder.',
+		displayOptions: { show: showOnlyForFolderRename },
+	},
+	{
+		displayName: 'Purge Cache',
+		name: 'purgeCache',
+		type: 'boolean',
+		default: true,
+		description: 'Whether to purge CDN cache for the old folder path.',
+		displayOptions: { show: showOnlyForFolderRename },
+	},
+	// Get Job Status
+	{
+		displayName: 'Job ID',
+		name: 'jobId',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The ID of the bulk job to check status for.',
+		displayOptions: { show: showOnlyForFolderGetJobStatus },
+	},
+];
+
+export async function executeFolder(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
+	const operation = this.getNodeParameter('operation', i) as string;
+
+	let options: IHttpRequestOptions;
+
+	switch (operation) {
+		case 'create': {
+			const folderName = this.getNodeParameter('folderName', i) as string;
+			const parentFolderPath = this.getNodeParameter('parentFolderPath', i) as string;
+			options = {
+				method: 'POST',
+				baseURL: 'https://api.imagekit.io',
+				url: '/v1/folder',
+				body: { folderName, parentFolderPath },
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'delete': {
+			const folderPath = this.getNodeParameter('folderPath', i) as string;
+			options = {
+				method: 'DELETE',
+				baseURL: 'https://api.imagekit.io',
+				url: '/v1/folder',
+				body: { folderPath },
+			};
+			await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: { success: true, folderPath } as IDataObject }];
+		}
+		case 'copy': {
+			const sourceFolderPath = this.getNodeParameter('sourceFolderPath', i) as string;
+			const destinationPath = this.getNodeParameter('destinationPath', i) as string;
+			options = {
+				method: 'POST',
+				baseURL: 'https://api.imagekit.io',
+				url: '/v1/bulkJobs/copyFolder',
+				body: { sourceFolderPath, destinationPath },
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'move': {
+			const sourceFolderPath = this.getNodeParameter('sourceFolderPath', i) as string;
+			const destinationPath = this.getNodeParameter('destinationPath', i) as string;
+			options = {
+				method: 'POST',
+				baseURL: 'https://api.imagekit.io',
+				url: '/v1/bulkJobs/moveFolder',
+				body: { sourceFolderPath, destinationPath },
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'rename': {
+			const sourceFolderPath = this.getNodeParameter('sourceFolderPath', i) as string;
+			const newFolderName = this.getNodeParameter('newFolderName', i) as string;
+			const purgeCache = this.getNodeParameter('purgeCache', i) as boolean;
+			options = {
+				method: 'POST',
+				baseURL: 'https://api.imagekit.io',
+				url: '/v1/bulkJobs/renameFolder',
+				body: { sourceFolderPath, newFolderName, purgeCache },
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'getJobStatus': {
+			const jobId = this.getNodeParameter('jobId', i) as string;
+			options = {
+				method: 'GET',
+				baseURL: 'https://api.imagekit.io',
+				url: `/v1/bulkJobs/${jobId}`,
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: responseData as IDataObject }];
+		}
+		default:
+			throw new Error(`Unsupported folder operation: ${operation}`);
+	}
+}

@@ -1,0 +1,189 @@
+import type {
+	IDataObject,
+	IExecuteFunctions,
+	IHttpRequestOptions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
+
+const showOnlyForSavedExtension = {
+	resource: ['savedExtension'],
+};
+
+const showOnlyForSavedExtensionCreate = {
+	operation: ['create'],
+	resource: ['savedExtension'],
+};
+
+const showOnlyForSavedExtensionUpdate = {
+	operation: ['update'],
+	resource: ['savedExtension'],
+};
+
+const showOnlyForSavedExtensionGet = {
+	operation: ['get'],
+	resource: ['savedExtension'],
+};
+
+const showOnlyForSavedExtensionDelete = {
+	operation: ['delete'],
+	resource: ['savedExtension'],
+};
+
+export const savedExtensionDescription: INodeProperties[] = [
+	{
+		displayName: 'Operation',
+		name: 'operation',
+		type: 'options',
+		noDataExpression: true,
+		displayOptions: { show: showOnlyForSavedExtension },
+		options: [
+			{
+				name: 'Create',
+				value: 'create',
+				action: 'Create a saved extension',
+				description: 'Create a new saved extension.',
+			},
+			{
+				name: 'Update',
+				value: 'update',
+				action: 'Update a saved extension',
+				description: 'Update an existing saved extension.',
+			},
+			{
+				name: 'List',
+				value: 'list',
+				action: 'List saved extensions',
+				description: 'List all saved extensions.',
+			},
+			{
+				name: 'Get',
+				value: 'get',
+				action: 'Get a saved extension',
+				description: 'Get details of a specific saved extension.',
+			},
+			{
+				name: 'Delete',
+				value: 'delete',
+				action: 'Delete a saved extension',
+				description: 'Delete a saved extension.',
+			},
+		],
+		default: 'list',
+	},
+	// Create
+	{
+		displayName: 'Extension Data (JSON)',
+		name: 'extensionData',
+		type: 'json',
+		required: true,
+		default: '{}',
+		description: 'JSON object with saved extension configuration.',
+		displayOptions: { show: showOnlyForSavedExtensionCreate },
+	},
+	// Update
+	{
+		displayName: 'Extension ID',
+		name: 'extensionId',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The ID of the saved extension to update.',
+		displayOptions: { show: showOnlyForSavedExtensionUpdate },
+	},
+	{
+		displayName: 'Extension Data (JSON)',
+		name: 'extensionData',
+		type: 'json',
+		required: true,
+		default: '{}',
+		description: 'JSON object with saved extension configuration to update.',
+		displayOptions: { show: showOnlyForSavedExtensionUpdate },
+	},
+	// Get
+	{
+		displayName: 'Extension ID',
+		name: 'extensionId',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The ID of the saved extension to get.',
+		displayOptions: { show: showOnlyForSavedExtensionGet },
+	},
+	// Delete
+	{
+		displayName: 'Extension ID',
+		name: 'extensionId',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The ID of the saved extension to delete.',
+		displayOptions: { show: showOnlyForSavedExtensionDelete },
+	},
+];
+
+export async function executeSavedExtension(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
+	const operation = this.getNodeParameter('operation', i) as string;
+
+	let options: IHttpRequestOptions;
+
+	switch (operation) {
+		case 'create': {
+			const extensionData = JSON.parse(this.getNodeParameter('extensionData', i) as string);
+			options = {
+				method: 'POST',
+				baseURL: 'https://api.imagekit.io',
+				url: '/v1/saved-extensions',
+				body: extensionData,
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'update': {
+			const extensionId = this.getNodeParameter('extensionId', i) as string;
+			const extensionData = JSON.parse(this.getNodeParameter('extensionData', i) as string);
+			options = {
+				method: 'PATCH',
+				baseURL: 'https://api.imagekit.io',
+				url: `/v1/saved-extensions/${extensionId}`,
+				body: extensionData,
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'list': {
+			options = {
+				method: 'GET',
+				baseURL: 'https://api.imagekit.io',
+				url: '/v1/saved-extensions',
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			if (Array.isArray(responseData)) {
+				return this.helpers.returnJsonArray(responseData as IDataObject[]);
+			}
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'get': {
+			const extensionId = this.getNodeParameter('extensionId', i) as string;
+			options = {
+				method: 'GET',
+				baseURL: 'https://api.imagekit.io',
+				url: `/v1/saved-extensions/${extensionId}`,
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'delete': {
+			const extensionId = this.getNodeParameter('extensionId', i) as string;
+			options = {
+				method: 'DELETE',
+				baseURL: 'https://api.imagekit.io',
+				url: `/v1/saved-extensions/${extensionId}`,
+			};
+			await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: { success: true, extensionId } as IDataObject }];
+		}
+		default:
+			throw new Error(`Unsupported saved extension operation: ${operation}`);
+	}
+}

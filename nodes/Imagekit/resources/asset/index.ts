@@ -1,5 +1,9 @@
-import type { INodeProperties } from 'n8n-workflow';
-import { assetListDescription } from './list';
+import type {
+    IExecuteFunctions,
+    INodeExecutionData,
+    INodeProperties,
+} from 'n8n-workflow';
+import { assetListDescription, listAssets } from './list';
 
 const showOnlyForAssets = {
 	resource: ['asset'],
@@ -20,30 +24,20 @@ export const assetDescription: INodeProperties[] = [
 				value: 'list',
 				action: 'List and search assets',
 				description: 'This API can list all the uploaded files and folders in your ImageKit.io media library. In addition, you can fine-tune your query by specifying various filters by generating a query string in a Lucene-like syntax and provide this generated string as the value of the searchQuery.',
-				routing: {
-					request: {
-						method: 'GET',
-                        url: '/v1/files',
-                        qs: {
-                            limit: '={{ $parameter.limit }}',
-                            skip: '={{ $parameter.skip }}',
-                        }
-                    },
-                    operations: {
-                        pagination: {
-                            type: 'offset',
-                            properties: {
-                                limitParameter: '={{ $parameter.limit }}',
-                                offsetParameter: '={{ $parameter.skip }}',
-                                pageSize: 100,
-                                type: 'query',
-                            },
-                        }
-                    }
-				},
 			},
 		],
 		default: 'list',
 	},
 	...assetListDescription,
 ];
+
+export async function executeAsset(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
+    const operation = this.getNodeParameter('operation', i) as string;
+
+    switch (operation) {
+        case 'list':
+            return listAssets.call(this, i);
+        default:
+            throw new Error(`Unsupported asset operation: ${operation}`);
+    }
+}

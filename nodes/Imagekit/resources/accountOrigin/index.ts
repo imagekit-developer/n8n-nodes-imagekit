@@ -1,0 +1,189 @@
+import type {
+	IDataObject,
+	IExecuteFunctions,
+	IHttpRequestOptions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
+
+const showOnlyForAccountOrigin = {
+	resource: ['accountOrigin'],
+};
+
+const showOnlyForAccountOriginCreate = {
+	operation: ['create'],
+	resource: ['accountOrigin'],
+};
+
+const showOnlyForAccountOriginUpdate = {
+	operation: ['update'],
+	resource: ['accountOrigin'],
+};
+
+const showOnlyForAccountOriginGet = {
+	operation: ['get'],
+	resource: ['accountOrigin'],
+};
+
+const showOnlyForAccountOriginDelete = {
+	operation: ['delete'],
+	resource: ['accountOrigin'],
+};
+
+export const accountOriginDescription: INodeProperties[] = [
+	{
+		displayName: 'Operation',
+		name: 'operation',
+		type: 'options',
+		noDataExpression: true,
+		displayOptions: { show: showOnlyForAccountOrigin },
+		options: [
+			{
+				name: 'Create',
+				value: 'create',
+				action: 'Create an origin',
+				description: 'Create a new origin.',
+			},
+			{
+				name: 'Update',
+				value: 'update',
+				action: 'Update an origin',
+				description: 'Update an existing origin.',
+			},
+			{
+				name: 'List',
+				value: 'list',
+				action: 'List origins',
+				description: 'List all origins.',
+			},
+			{
+				name: 'Get',
+				value: 'get',
+				action: 'Get an origin',
+				description: 'Get details of a specific origin.',
+			},
+			{
+				name: 'Delete',
+				value: 'delete',
+				action: 'Delete an origin',
+				description: 'Delete an origin.',
+			},
+		],
+		default: 'list',
+	},
+	// Create
+	{
+		displayName: 'Origin Data (JSON)',
+		name: 'originData',
+		type: 'json',
+		required: true,
+		default: '{}',
+		description: 'JSON object with origin configuration.',
+		displayOptions: { show: showOnlyForAccountOriginCreate },
+	},
+	// Update
+	{
+		displayName: 'Origin ID',
+		name: 'originId',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The ID of the origin to update.',
+		displayOptions: { show: showOnlyForAccountOriginUpdate },
+	},
+	{
+		displayName: 'Origin Data (JSON)',
+		name: 'originData',
+		type: 'json',
+		required: true,
+		default: '{}',
+		description: 'JSON object with origin configuration to update.',
+		displayOptions: { show: showOnlyForAccountOriginUpdate },
+	},
+	// Get
+	{
+		displayName: 'Origin ID',
+		name: 'originId',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The ID of the origin to get.',
+		displayOptions: { show: showOnlyForAccountOriginGet },
+	},
+	// Delete
+	{
+		displayName: 'Origin ID',
+		name: 'originId',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The ID of the origin to delete.',
+		displayOptions: { show: showOnlyForAccountOriginDelete },
+	},
+];
+
+export async function executeAccountOrigin(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
+	const operation = this.getNodeParameter('operation', i) as string;
+
+	let options: IHttpRequestOptions;
+
+	switch (operation) {
+		case 'create': {
+			const originData = JSON.parse(this.getNodeParameter('originData', i) as string);
+			options = {
+				method: 'POST',
+				baseURL: 'https://api.imagekit.io',
+				url: '/v1/accounts/origins',
+				body: originData,
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'update': {
+			const originId = this.getNodeParameter('originId', i) as string;
+			const originData = JSON.parse(this.getNodeParameter('originData', i) as string);
+			options = {
+				method: 'PUT',
+				baseURL: 'https://api.imagekit.io',
+				url: `/v1/accounts/origins/${originId}`,
+				body: originData,
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'list': {
+			options = {
+				method: 'GET',
+				baseURL: 'https://api.imagekit.io',
+				url: '/v1/accounts/origins',
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			if (Array.isArray(responseData)) {
+				return this.helpers.returnJsonArray(responseData as IDataObject[]);
+			}
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'get': {
+			const originId = this.getNodeParameter('originId', i) as string;
+			options = {
+				method: 'GET',
+				baseURL: 'https://api.imagekit.io',
+				url: `/v1/accounts/origins/${originId}`,
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'delete': {
+			const originId = this.getNodeParameter('originId', i) as string;
+			options = {
+				method: 'DELETE',
+				baseURL: 'https://api.imagekit.io',
+				url: `/v1/accounts/origins/${originId}`,
+			};
+			await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: { success: true, originId } as IDataObject }];
+		}
+		default:
+			throw new Error(`Unsupported account origin operation: ${operation}`);
+	}
+}

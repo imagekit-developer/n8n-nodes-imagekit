@@ -1,0 +1,189 @@
+import type {
+	IDataObject,
+	IExecuteFunctions,
+	IHttpRequestOptions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
+
+const showOnlyForAccountUrlEndpoint = {
+	resource: ['accountUrlEndpoint'],
+};
+
+const showOnlyForAccountUrlEndpointCreate = {
+	operation: ['create'],
+	resource: ['accountUrlEndpoint'],
+};
+
+const showOnlyForAccountUrlEndpointUpdate = {
+	operation: ['update'],
+	resource: ['accountUrlEndpoint'],
+};
+
+const showOnlyForAccountUrlEndpointGet = {
+	operation: ['get'],
+	resource: ['accountUrlEndpoint'],
+};
+
+const showOnlyForAccountUrlEndpointDelete = {
+	operation: ['delete'],
+	resource: ['accountUrlEndpoint'],
+};
+
+export const accountUrlEndpointDescription: INodeProperties[] = [
+	{
+		displayName: 'Operation',
+		name: 'operation',
+		type: 'options',
+		noDataExpression: true,
+		displayOptions: { show: showOnlyForAccountUrlEndpoint },
+		options: [
+			{
+				name: 'Create',
+				value: 'create',
+				action: 'Create a URL endpoint',
+				description: 'Create a new URL endpoint.',
+			},
+			{
+				name: 'Update',
+				value: 'update',
+				action: 'Update a URL endpoint',
+				description: 'Update an existing URL endpoint.',
+			},
+			{
+				name: 'List',
+				value: 'list',
+				action: 'List URL endpoints',
+				description: 'List all URL endpoints.',
+			},
+			{
+				name: 'Get',
+				value: 'get',
+				action: 'Get a URL endpoint',
+				description: 'Get details of a specific URL endpoint.',
+			},
+			{
+				name: 'Delete',
+				value: 'delete',
+				action: 'Delete a URL endpoint',
+				description: 'Delete a URL endpoint.',
+			},
+		],
+		default: 'list',
+	},
+	// Create
+	{
+		displayName: 'Endpoint Data (JSON)',
+		name: 'endpointData',
+		type: 'json',
+		required: true,
+		default: '{}',
+		description: 'JSON object with URL endpoint configuration.',
+		displayOptions: { show: showOnlyForAccountUrlEndpointCreate },
+	},
+	// Update
+	{
+		displayName: 'Endpoint ID',
+		name: 'endpointId',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The ID of the URL endpoint to update.',
+		displayOptions: { show: showOnlyForAccountUrlEndpointUpdate },
+	},
+	{
+		displayName: 'Endpoint Data (JSON)',
+		name: 'endpointData',
+		type: 'json',
+		required: true,
+		default: '{}',
+		description: 'JSON object with URL endpoint configuration to update.',
+		displayOptions: { show: showOnlyForAccountUrlEndpointUpdate },
+	},
+	// Get
+	{
+		displayName: 'Endpoint ID',
+		name: 'endpointId',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The ID of the URL endpoint to get.',
+		displayOptions: { show: showOnlyForAccountUrlEndpointGet },
+	},
+	// Delete
+	{
+		displayName: 'Endpoint ID',
+		name: 'endpointId',
+		type: 'string',
+		required: true,
+		default: '',
+		description: 'The ID of the URL endpoint to delete.',
+		displayOptions: { show: showOnlyForAccountUrlEndpointDelete },
+	},
+];
+
+export async function executeAccountUrlEndpoint(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
+	const operation = this.getNodeParameter('operation', i) as string;
+
+	let options: IHttpRequestOptions;
+
+	switch (operation) {
+		case 'create': {
+			const endpointData = JSON.parse(this.getNodeParameter('endpointData', i) as string);
+			options = {
+				method: 'POST',
+				baseURL: 'https://api.imagekit.io',
+				url: '/v1/accounts/url-endpoints',
+				body: endpointData,
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'update': {
+			const endpointId = this.getNodeParameter('endpointId', i) as string;
+			const endpointData = JSON.parse(this.getNodeParameter('endpointData', i) as string);
+			options = {
+				method: 'PUT',
+				baseURL: 'https://api.imagekit.io',
+				url: `/v1/accounts/url-endpoints/${endpointId}`,
+				body: endpointData,
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'list': {
+			options = {
+				method: 'GET',
+				baseURL: 'https://api.imagekit.io',
+				url: '/v1/accounts/url-endpoints',
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			if (Array.isArray(responseData)) {
+				return this.helpers.returnJsonArray(responseData as IDataObject[]);
+			}
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'get': {
+			const endpointId = this.getNodeParameter('endpointId', i) as string;
+			options = {
+				method: 'GET',
+				baseURL: 'https://api.imagekit.io',
+				url: `/v1/accounts/url-endpoints/${endpointId}`,
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'delete': {
+			const endpointId = this.getNodeParameter('endpointId', i) as string;
+			options = {
+				method: 'DELETE',
+				baseURL: 'https://api.imagekit.io',
+				url: `/v1/accounts/url-endpoints/${endpointId}`,
+			};
+			await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			return [{ json: { success: true, endpointId } as IDataObject }];
+		}
+		default:
+			throw new Error(`Unsupported account URL endpoint operation: ${operation}`);
+	}
+}

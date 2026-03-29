@@ -14,13 +14,17 @@ ImageKit is a complete media management solution that provides real-time image a
 - [x] Basic node structure and configuration
 - [x] ImageKit API credentials setup
 - [x] Asset listing and search functionality
-- [ ] File upload operations
-- [ ] File update and delete operations
-- [ ] Folder management operations
-- [ ] Custom metadata fields management
-- [ ] Cache purging functionality
-- [ ] Metadata extraction operations
-- [ ] Account information retrieval
+- [x] File upload, get, update, delete, copy, move, rename operations
+- [x] Bulk file operations (delete, add tags, remove tags, remove AI tags)
+- [x] File version management (list, get, delete, restore)
+- [x] Metadata extraction (by file ID, from URL)
+- [x] Folder management (create, delete, copy, move, rename, job status)
+- [x] Custom metadata fields management (create, update, list, delete)
+- [x] Cache purging (purge, get status)
+- [x] Account usage retrieval
+- [x] Account origins management (create, update, list, get, delete)
+- [x] Account URL endpoints management (create, update, list, get, delete)
+- [x] Saved extensions management (create, update, list, get, delete)
 
 ### Testing & Quality
 - [ ] Unit tests implementation
@@ -69,22 +73,69 @@ This node supports the following ImageKit resources and operations:
 - **List and Search**: List all uploaded files and folders in your ImageKit media library with advanced search capabilities using Lucene-like syntax
 
 ### File
-- File upload, update, and management operations
+- **Upload**: Upload a file from binary data or URL
+- **Get Details**: Get details of a file by its ID
+- **Update**: Update file details (tags, custom metadata, extensions, etc.)
+- **Delete**: Delete a file by its ID
+- **Copy**: Copy a file to another location
+- **Move**: Move a file to another location
+- **Rename**: Rename a file
+- **Bulk Delete**: Delete multiple files by their IDs
+- **Bulk Add Tags**: Add tags to multiple files
+- **Bulk Remove Tags**: Remove tags from multiple files
+- **Bulk Remove AI Tags**: Remove AI tags from multiple files
 
-### Folder
-- Folder creation and management operations
-
-### Custom Metadata Fields
-- Manage custom metadata fields for your assets
-
-### Purge Cache
-- Clear cached assets from ImageKit's CDN
+### File Version
+- **List**: List all versions of a file
+- **Get**: Get a specific version of a file
+- **Delete**: Delete a specific version of a file
+- **Restore**: Restore a specific version of a file
 
 ### Metadata
-- Extract and manage asset metadata
+- **Get by File ID**: Get metadata of a file by its ID
+- **Get from URL**: Get metadata of a file from its remote URL
+
+### Folder
+- **Create**: Create a new folder
+- **Delete**: Delete a folder
+- **Copy**: Copy a folder to another location
+- **Move**: Move a folder to another location
+- **Rename**: Rename a folder
+- **Get Job Status**: Get the status of a bulk folder operation job
+
+### Custom Metadata Fields
+- **Create**: Create a new custom metadata field
+- **Update**: Update an existing custom metadata field
+- **List**: List all custom metadata fields
+- **Delete**: Delete a custom metadata field
+
+### Purge Cache
+- **Purge**: Purge cache for a file URL
+- **Get Purge Status**: Get the status of a purge request
 
 ### Account
-- Access account-level information and settings
+- **Get Usage**: Get account usage statistics
+
+### Account Origin
+- **Create**: Create a new origin
+- **Update**: Update an existing origin
+- **List**: List all origins
+- **Get**: Get details of a specific origin
+- **Delete**: Delete an origin
+
+### Account URL Endpoint
+- **Create**: Create a new URL endpoint
+- **Update**: Update an existing URL endpoint
+- **List**: List all URL endpoints
+- **Get**: Get details of a specific URL endpoint
+- **Delete**: Delete a URL endpoint
+
+### Saved Extension
+- **Create**: Create a new saved extension
+- **Update**: Update an existing saved extension
+- **List**: List all saved extensions
+- **Get**: Get details of a specific saved extension
+- **Delete**: Delete a saved extension
 
 ## Credentials
 
