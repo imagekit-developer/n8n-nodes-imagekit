@@ -11,7 +11,7 @@ import type { Icon, ICredentialType, INodeProperties } from 'n8n-workflow';
 export class ImagekitWebhookApi implements ICredentialType {
 	name = 'imagekitWebhookApi';
 
-	displayName = 'ImageKit Webhook';
+	displayName = 'ImageKit Webhook API';
 
 	icon = {
 		light: 'file:../nodes/Imagekit/imagekit.svg',
