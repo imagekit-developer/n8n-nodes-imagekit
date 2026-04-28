@@ -23,7 +23,7 @@ ImageKit is a complete media management solution that provides real-time image a
 - [x] Account origins management (create, update, list, get, delete)
 - [x] Account URL endpoints management (create, update, list, get, delete)
 - [x] Saved extensions management (create, update, list, get, delete)
-- [ ] Webhook triggers (listen for ImageKit events)
+- [x] Webhook triggers (listen for ImageKit events)
 
 ### Testing & Quality
 - [x] Unit tests implementation
