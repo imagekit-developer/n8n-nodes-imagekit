@@ -1,6 +1,6 @@
 {
   "name": "@ahnv/n8n-nodes-imagekit",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "n8n community node for the ImageKit Media APIs",
   "license": "MIT",
   "homepage": "https://github.com/ahnv/n8n-nodes-imagekit",
