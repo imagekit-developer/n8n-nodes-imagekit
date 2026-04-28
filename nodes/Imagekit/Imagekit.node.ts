@@ -25,7 +25,7 @@ export class Imagekit implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Imagekit',
 		name: 'imagekit',
-		icon: { light: 'file:imagekit.svg', dark: 'file:imagekit.svg' },
+		icon: { light: 'file:imagekit.light.svg', dark: 'file:imagekit.dark.svg' },
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
@@ -180,7 +180,10 @@ export class Imagekit implements INodeType {
 				}
 			} catch (error) {
 				if (this.continueOnFail()) {
-					returnData.push({ json: { error: (error as Error).message } });
+					// pairedItem preserves the link back to the input item that
+					// produced this error so downstream nodes can correlate failures
+					// with the originating row when running in continueOnFail mode.
+					returnData.push({ json: { error: (error as Error).message }, pairedItem: { item: i } });
 					continue;
 				}
 				throw error;

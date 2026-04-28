@@ -12,8 +12,8 @@ export class ImagekitApi implements ICredentialType {
 	displayName = 'ImageKit API';
 
 	icon = {
-		light: 'file:../nodes/Imagekit/imagekit.svg',
-		dark: 'file:../nodes/Imagekit/imagekit.svg',
+		light: 'file:../nodes/Imagekit/imagekit.light.svg',
+		dark: 'file:../nodes/Imagekit/imagekit.dark.svg',
 	} satisfies Icon;
 
 	documentationUrl = 'https://github.com/ahnv/n8n-nodes-imagekit/#credentials';

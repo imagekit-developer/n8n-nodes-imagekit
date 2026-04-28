@@ -14,8 +14,8 @@ export class ImagekitWebhookApi implements ICredentialType {
 	displayName = 'ImageKit Webhook API';
 
 	icon = {
-		light: 'file:../nodes/Imagekit/imagekit.svg',
-		dark: 'file:../nodes/Imagekit/imagekit.svg',
+		light: 'file:../nodes/Imagekit/imagekit.light.svg',
+		dark: 'file:../nodes/Imagekit/imagekit.dark.svg',
 	} satisfies Icon;
 
 	documentationUrl = 'https://imagekit.io/docs/webhooks';

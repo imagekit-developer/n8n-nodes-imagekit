@@ -2,13 +2,18 @@
 // Run `npm run generate` after updating vendor/sdk-generation or openapi/config.json.
 
 import type {
+	ICredentialDataDecryptedObject,
+	ICredentialsDecrypted,
+	ICredentialTestFunctions,
 	IDataObject,
+	INodeCredentialTestResult,
 	INodeType,
 	INodeTypeDescription,
 	IWebhookFunctions,
 	IWebhookResponseData,
 } from 'n8n-workflow';
 import { NodeConnectionTypes } from 'n8n-workflow';
+import { createHmac } from 'crypto';
 import { verifyImagekitSignature } from './verifySignature';
 
 /** Single trigger node for every ImageKit webhook event. Sits next to
@@ -19,7 +24,7 @@ export class ImagekitTrigger implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Imagekit Trigger',
 		name: 'imagekitTrigger',
-		icon: { light: 'file:imagekit.svg', dark: 'file:imagekit.svg' },
+		icon: { light: 'file:imagekit.light.svg', dark: 'file:imagekit.dark.svg' },
 		group: ['trigger'],
 		version: 1,
 		subtitle: '={{$parameter["events"].join(", ")}}',
@@ -27,12 +32,20 @@ export class ImagekitTrigger implements INodeType {
 			'Triggers on ImageKit webhook events (file lifecycle, transformations, video processing).',
 		eventTriggerDescription: 'Waiting for an ImageKit webhook delivery',
 		defaults: { name: 'Imagekit Trigger' },
+		// Surfaces the trigger as an AI tool so agents can subscribe to ImageKit
+		// webhook events programmatically (matches the n8n strict-lint default).
+		usableAsTool: true,
 		inputs: [],
 		outputs: [NodeConnectionTypes.Main],
 		credentials: [
 			{
 				name: 'imagekitWebhookApi',
 				required: false,
+				// Locally-defined HMAC sanity check; see methods.credentialTest below.
+				// n8n's credential-test-required lint rule requires every node-level
+				// usage of a credential to declare either an HTTP test or a testedBy
+				// reference, since webhook signing secrets can't be remotely validated.
+				testedBy: 'imagekitWebhookSecretTest',
 				displayOptions: { show: { verifySignature: [true] } },
 			},
 		],
@@ -182,4 +195,49 @@ export class ImagekitTrigger implements INodeType {
 
 		return { workflowData: [this.helpers.returnJsonArray([body])] };
 	}
+
+	/** Local credential test for ImagekitWebhookApi. n8n's credential lint
+	 *  rule requires every credential to declare a `test` or `testedBy`,
+	 *  and webhook signing secrets cannot be remotely validated (there is no
+	 *  ImageKit endpoint that accepts the secret to confirm it). So this test
+	 *  runs the secret through the same HMAC-SHA256 routine the runtime
+	 *  webhook handler uses, catching malformed inputs (empty, non-string,
+	 *  unsupported encodings) before any delivery is received. */
+	methods = {
+		credentialTest: {
+			async imagekitWebhookSecretTest(
+				this: ICredentialTestFunctions,
+				credential: ICredentialsDecrypted,
+			): Promise<INodeCredentialTestResult> {
+				const data = (credential.data ?? {}) as ICredentialDataDecryptedObject;
+				const secret = (data.secret as string | undefined) ?? '';
+				if (!secret) {
+					return { status: 'Error', message: 'Webhook secret is required.' };
+				}
+				if (!secret.startsWith('whsec_')) {
+					return {
+						status: 'Error',
+						message:
+							'Webhook secret must start with "whsec_" (copy it from the ImageKit dashboard).',
+					};
+				}
+				try {
+					// Same HMAC routine the runtime handler uses. If Node's crypto
+					// rejects the key (e.g. unsupported encoding) this throws and we
+					// surface the underlying message to the user.
+					createHmac('sha256', secret).update('imagekit-credential-test').digest('hex');
+				} catch (error) {
+					return {
+						status: 'Error',
+						message: `Secret cannot be used as an HMAC-SHA256 key: ${(error as Error).message}`,
+					};
+				}
+				return {
+					status: 'OK',
+					message:
+						'Webhook secret format is valid. Real signature verification happens when ImageKit delivers a webhook.',
+				};
+			},
+		},
+	};
 }
