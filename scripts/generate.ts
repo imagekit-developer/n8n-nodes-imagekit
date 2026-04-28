@@ -744,7 +744,7 @@ function emitTriggerFile(
 		`\tIWebhookFunctions,`,
 		`\tIWebhookResponseData,`,
 		`} from 'n8n-workflow';`,
-		`import { NodeConnectionType } from 'n8n-workflow';`,
+		`import { NodeConnectionTypes } from 'n8n-workflow';`,
 		`import { verifyImagekitSignature } from './verifySignature';`,
 	].join('\n');
 
@@ -765,7 +765,7 @@ export class ImagekitTrigger implements INodeType {
 		eventTriggerDescription: 'Waiting for an ImageKit webhook delivery',
 		defaults: { name: 'Imagekit Trigger' },
 		inputs: [],
-		outputs: [NodeConnectionType.Main],
+		outputs: [NodeConnectionTypes.Main],
 		credentials: [
 			{
 				name: 'imagekitWebhookApi',

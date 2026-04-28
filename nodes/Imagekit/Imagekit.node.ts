@@ -4,7 +4,7 @@ import type {
 	INodeExecutionData,
 	IExecuteFunctions,
 } from 'n8n-workflow';
-import { NodeConnectionType, NodeOperationError } from 'n8n-workflow';
+import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { assetDescription, executeAsset } from './resources/asset';
 import { fileDescription, executeFile } from './resources/file';
 // Resources below are produced by scripts/generate.ts from
@@ -34,8 +34,8 @@ export class Imagekit implements INodeType {
 			name: 'Imagekit',
 		},
 		usableAsTool: true,
-		inputs: [NodeConnectionType.Main],
-		outputs: [NodeConnectionType.Main],
+		inputs: [NodeConnectionTypes.Main],
+		outputs: [NodeConnectionTypes.Main],
 		credentials: [{ name: 'imagekitApi', required: true }],
 		requestDefaults: {
 			baseURL: 'https://api.imagekit.io',

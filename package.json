@@ -46,14 +46,14 @@
     ]
   },
   "devDependencies": {
-    "@n8n/node-cli": "*",
+    "@n8n/node-cli": "^0.28.0",
     "@types/jest": "^30.0.0",
     "@types/js-yaml": "^4.0.9",
     "eslint": "9.32.0",
     "jest": "^30.3.0",
     "js-yaml": "^4.1.1",
     "prettier": "3.6.2",
-    "release-it": "^19.0.4",
+    "release-it": "^20.0.1",
     "ts-jest": "^29.4.6",
     "tsx": "^4.21.0",
     "typescript": "5.9.2"
