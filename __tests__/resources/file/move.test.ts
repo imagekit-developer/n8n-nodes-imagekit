@@ -1,4 +1,4 @@
-import { moveFile } from '../../../nodes/Imagekit/resources/file/move';
+import { executeFile } from "../../../nodes/Imagekit/resources/_generated/file";
 import { createMockExecuteFunctions } from '../../helpers/mockExecuteFunctions';
 
 describe('moveFile', () => {
@@ -6,13 +6,14 @@ describe('moveFile', () => {
 		const mockResponse = { jobId: 'move-job-1' };
 		const context = createMockExecuteFunctions({
 			nodeParameters: {
+					operation: "move",
 				sourceFilePath: '/images/old.jpg',
 				destinationPath: '/archive/',
 			},
 			httpResponse: mockResponse,
 		});
 
-		const result = await moveFile.call(context, 0);
+		const result = await executeFile.call(context, 0);
 
 		expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
 			'imagekitApi',

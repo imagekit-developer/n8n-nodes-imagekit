@@ -1,4 +1,4 @@
-import { executeFileVersion } from '../../../nodes/Imagekit/resources/fileVersion/index';
+import { executeFileVersion } from '../../../nodes/Imagekit/resources/_generated/fileVersion';
 import { createMockExecuteFunctions } from '../../helpers/mockExecuteFunctions';
 
 describe('executeFileVersion', () => {

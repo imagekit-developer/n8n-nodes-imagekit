@@ -9,12 +9,12 @@
     "resources": {
         "credentialDocumentation": [
             {
-                "url": "https://github.com/ahnvd/n8n-nodes-imagekit#credentials"
+                "url": "https://github.com/ahnv/n8n-nodes-imagekit#credentials"
             }
         ],
         "primaryDocumentation": [
             {
-                "url": "https://github.com/ahnvd/n8n-nodes-imagekit"
+                "url": "https://github.com/ahnv/n8n-nodes-imagekit"
             }
         ]
     }

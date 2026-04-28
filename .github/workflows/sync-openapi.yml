@@ -1,0 +1,68 @@
+name: Sync OpenAPI
+
+# Bumps the `vendor/sdk-generation` submodule to its upstream HEAD,
+# regenerates the codegen output, and opens a PR if anything changed.
+# Stainless cross-validation runs as part of `npm run generate` and surfaces
+# upstream changes (new ops, renames) in the workflow logs.
+#
+# Triggers:
+#   - schedule:           daily at 03:14 UTC
+#   - workflow_dispatch:  manual run from the Actions tab
+
+on:
+  schedule:
+    - cron: '14 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Bump submodule to upstream HEAD
+        run: git submodule update --remote --merge vendor/sdk-generation
+
+      - name: Regenerate resources
+        run: npm run generate
+
+      - name: Run tests against regenerated resources
+        run: npm test
+
+      - name: Open PR if anything changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: 'chore: sync vendor/sdk-generation submodule'
+          title: 'chore: sync with latest ImageKit OpenAPI spec'
+          branch: chore/sync-openapi
+          delete-branch: true
+          add-paths: |
+            vendor/sdk-generation
+            nodes/Imagekit/resources/_generated/**
+          body: |
+            Automated sync of the upstream
+            [`imagekit-developer/sdk-generation`](https://github.com/imagekit-developer/sdk-generation)
+            submodule.
+
+            - Submodule bumped to upstream `main` HEAD
+            - `npm run generate` re-ran the codegen and Stainless cross-validation
+            - `npm run test:generated` passes
+
+            Review the diff under `nodes/Imagekit/resources/_generated/`
+            for any user-visible changes (new operations, renamed fields,
+            etc.) before merging. New unmapped operations show up in the
+            generator's `[drift]` and `[stainless]` warnings — see workflow logs.

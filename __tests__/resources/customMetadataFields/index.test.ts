@@ -1,4 +1,4 @@
-import { executeCustomMetadataFields } from '../../../nodes/Imagekit/resources/customMetadataFields/index';
+import { executeCustomMetadataFields } from '../../../nodes/Imagekit/resources/_generated/customMetadataFields';
 import { createMockExecuteFunctions } from '../../helpers/mockExecuteFunctions';
 
 describe('executeCustomMetadataFields', () => {
@@ -130,7 +130,7 @@ describe('executeCustomMetadataFields', () => {
 			});
 
 			await expect(executeCustomMetadataFields.call(context, 0)).rejects.toThrow(
-				'Unsupported custom metadata fields operation: invalid',
+				'Unsupported custom metadata field operation: invalid',
 			);
 		});
 	});

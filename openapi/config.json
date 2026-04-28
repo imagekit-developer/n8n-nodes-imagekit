@@ -1,0 +1,791 @@
+{
+  "_comment": "Maps OpenAPI operationIds to n8n resources/operations. The generator reads this with vendor/sdk-generation/openapi/v1.0.0.yaml to produce nodes/Imagekit/resources/_generated/*.ts. Edit this file (not the generated TS) to change UI field names, descriptions, or operation grouping. Operations listed in `programmatic` are skipped by the generator and must be hand-written.",
+  "baseURL": "https://api.imagekit.io",
+  "resources": {
+    "account": {
+      "displayName": "Account",
+      "singular": "account",
+      "article": "an",
+      "defaultOperation": "getUsage"
+    },
+    "accountOrigin": {
+      "displayName": "Account Origin",
+      "singular": "account origin",
+      "article": "an",
+      "defaultOperation": "list"
+    },
+    "accountUrlEndpoint": {
+      "displayName": "Account URL Endpoint",
+      "singular": "account URL endpoint",
+      "article": "a",
+      "defaultOperation": "list"
+    },
+    "fileVersion": {
+      "displayName": "File Version",
+      "singular": "file version",
+      "article": "a",
+      "defaultOperation": "list"
+    },
+    "folder": {
+      "displayName": "Folder",
+      "singular": "folder",
+      "article": "a",
+      "defaultOperation": "create"
+    },
+    "metadata": {
+      "displayName": "Metadata",
+      "singular": "metadata",
+      "article": "the",
+      "defaultOperation": "getByFileId"
+    },
+    "purgeCache": {
+      "displayName": "Purge Cache",
+      "singular": "purge cache",
+      "article": "a",
+      "defaultOperation": "purge"
+    },
+    "savedExtension": {
+      "displayName": "Saved Extension",
+      "singular": "saved extension",
+      "article": "a",
+      "defaultOperation": "list"
+    },
+    "customMetadataFields": {
+      "displayName": "Custom Metadata Fields",
+      "singular": "custom metadata field",
+      "article": "a",
+      "defaultOperation": "list"
+    },
+    "file": {
+      "_comment": "Partial codegen: the 9 operations below are generated; `upload` and `update` remain hand-written under nodes/Imagekit/resources/file/{upload,update}.ts. The hand-written nodes/Imagekit/resources/file/index.ts splices both halves together so Imagekit.node.ts sees a single resource. defaultOperation is set to 'get' purely so the generated description type-checks; the splicer overrides the operation switcher with one that defaults to 'upload'.",
+      "displayName": "File",
+      "singular": "file",
+      "article": "a",
+      "defaultOperation": "get"
+    }
+  },
+  "_programmatic_comment": "These operationIds are skipped by codegen. The hand-written asset resource and the file `upload`/`update` ops live under nodes/Imagekit/resources/<name>/ and are imported either directly (asset) or composed via a splicer (file). Migrate the rest by extending the generator (collection fields, derived values).",
+  "programmatic": [
+    "upload-file",
+    "upload-file-v2",
+    "update-file-details",
+    "list-and-search-assets"
+  ],
+  "operations": {
+    "get-usage": {
+      "resource": "account",
+      "operation": "getUsage",
+      "name": "Get Usage",
+      "action": "Get account usage",
+      "description": "Get account usage statistics",
+      "queryParams": {
+        "startDate": {
+          "displayName": "Start Date",
+          "type": "string",
+          "required": true,
+          "placeholder": "YYYY-MM-DD",
+          "description": "Start date for the usage period (format: YYYY-MM-DD)"
+        },
+        "endDate": {
+          "displayName": "End Date",
+          "type": "string",
+          "required": true,
+          "placeholder": "YYYY-MM-DD",
+          "description": "End date for the usage period (format: YYYY-MM-DD)"
+        }
+      }
+    },
+
+    "list-origins": {
+      "resource": "accountOrigin",
+      "operation": "list",
+      "name": "List",
+      "action": "List origins",
+      "description": "List all origins"
+    },
+    "create-origin": {
+      "resource": "accountOrigin",
+      "operation": "create",
+      "name": "Create",
+      "action": "Create an origin",
+      "description": "Create a new origin",
+      "body": {
+        "name": "originData",
+        "displayName": "Origin Data (JSON)",
+        "description": "JSON object with origin configuration"
+      }
+    },
+    "get-origin": {
+      "resource": "accountOrigin",
+      "operation": "get",
+      "name": "Get",
+      "action": "Get an origin",
+      "description": "Get details of a specific origin",
+      "pathParams": {
+        "id": { "name": "originId", "displayName": "Origin ID", "description": "The ID of the origin to get" }
+      }
+    },
+    "update-origin": {
+      "resource": "accountOrigin",
+      "operation": "update",
+      "name": "Update",
+      "action": "Update an origin",
+      "description": "Update an existing origin",
+      "pathParams": {
+        "id": { "name": "originId", "displayName": "Origin ID", "description": "The ID of the origin to update" }
+      },
+      "body": {
+        "name": "originData",
+        "displayName": "Origin Data (JSON)",
+        "description": "JSON object with origin configuration to update"
+      }
+    },
+    "delete-origin": {
+      "resource": "accountOrigin",
+      "operation": "delete",
+      "name": "Delete",
+      "action": "Delete an origin",
+      "description": "Delete an origin",
+      "pathParams": {
+        "id": { "name": "originId", "displayName": "Origin ID", "description": "The ID of the origin to delete" }
+      }
+    },
+
+    "list-url-endpoints": {
+      "resource": "accountUrlEndpoint",
+      "operation": "list",
+      "name": "List",
+      "action": "List URL endpoints",
+      "description": "List all URL endpoints"
+    },
+    "create-url-endpoint": {
+      "resource": "accountUrlEndpoint",
+      "operation": "create",
+      "name": "Create",
+      "action": "Create a URL endpoint",
+      "description": "Create a new URL endpoint",
+      "body": {
+        "name": "endpointData",
+        "displayName": "Endpoint Data (JSON)",
+        "description": "JSON object with URL endpoint configuration"
+      }
+    },
+    "get-url-endpoint": {
+      "resource": "accountUrlEndpoint",
+      "operation": "get",
+      "name": "Get",
+      "action": "Get a URL endpoint",
+      "description": "Get details of a specific URL endpoint",
+      "pathParams": {
+        "id": { "name": "endpointId", "displayName": "Endpoint ID", "description": "The ID of the URL endpoint to get" }
+      }
+    },
+    "update-url-endpoint": {
+      "resource": "accountUrlEndpoint",
+      "operation": "update",
+      "name": "Update",
+      "action": "Update a URL endpoint",
+      "description": "Update an existing URL endpoint",
+      "pathParams": {
+        "id": { "name": "endpointId", "displayName": "Endpoint ID", "description": "The ID of the URL endpoint to update" }
+      },
+      "body": {
+        "name": "endpointData",
+        "displayName": "Endpoint Data (JSON)",
+        "description": "JSON object with URL endpoint configuration to update"
+      }
+    },
+    "delete-url-endpoint": {
+      "resource": "accountUrlEndpoint",
+      "operation": "delete",
+      "name": "Delete",
+      "action": "Delete a URL endpoint",
+      "description": "Delete a URL endpoint",
+      "pathParams": {
+        "id": { "name": "endpointId", "displayName": "Endpoint ID", "description": "The ID of the URL endpoint to delete" }
+      }
+    },
+
+    "list-file-versions": {
+      "resource": "fileVersion",
+      "operation": "list",
+      "name": "List",
+      "action": "List file versions",
+      "description": "List all versions of a file",
+      "pathParams": {
+        "fileId": { "name": "fileId", "displayName": "File ID", "description": "The unique ID of the file" }
+      }
+    },
+    "get-file-version-details": {
+      "resource": "fileVersion",
+      "operation": "get",
+      "name": "Get",
+      "action": "Get a file version",
+      "description": "Get a specific version of a file",
+      "pathParams": {
+        "fileId":    { "name": "fileId",    "displayName": "File ID",    "description": "The unique ID of the file" },
+        "versionId": { "name": "versionId", "displayName": "Version ID", "description": "The version ID to retrieve" }
+      }
+    },
+    "delete-file-version": {
+      "resource": "fileVersion",
+      "operation": "delete",
+      "name": "Delete",
+      "action": "Delete a file version",
+      "description": "Delete a specific version of a file",
+      "pathParams": {
+        "fileId":    { "name": "fileId",    "displayName": "File ID",    "description": "The unique ID of the file" },
+        "versionId": { "name": "versionId", "displayName": "Version ID", "description": "The version ID to delete" }
+      }
+    },
+    "restore-file-version": {
+      "resource": "fileVersion",
+      "operation": "restore",
+      "name": "Restore",
+      "action": "Restore a file version",
+      "description": "Restore a specific version of a file",
+      "pathParams": {
+        "fileId":    { "name": "fileId",    "displayName": "File ID",    "description": "The unique ID of the file" },
+        "versionId": { "name": "versionId", "displayName": "Version ID", "description": "The version ID to restore" }
+      }
+    },
+
+    "create-folder": {
+      "resource": "folder",
+      "operation": "create",
+      "name": "Create",
+      "action": "Create a folder",
+      "description": "Create a new folder",
+      "bodyFields": {
+        "folderName": {
+          "displayName": "Folder Name",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The name of the folder to create"
+        },
+        "parentFolderPath": {
+          "displayName": "Parent Folder Path",
+          "type": "string",
+          "required": true,
+          "default": "/",
+          "description": "The path of the parent folder (e.g. /path/to/parent)"
+        }
+      }
+    },
+    "delete-folder": {
+      "resource": "folder",
+      "operation": "delete",
+      "name": "Delete",
+      "action": "Delete a folder",
+      "description": "Delete a folder",
+      "bodyFields": {
+        "folderPath": {
+          "displayName": "Folder Path",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The full path of the folder to delete"
+        }
+      },
+      "successEnvelope": "folderPath"
+    },
+    "copy-folder": {
+      "resource": "folder",
+      "operation": "copy",
+      "name": "Copy",
+      "action": "Copy a folder",
+      "description": "Copy a folder to another location",
+      "bodyFields": {
+        "sourceFolderPath": {
+          "displayName": "Source Folder Path",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The full path of the folder to copy"
+        },
+        "destinationPath": {
+          "displayName": "Destination Path",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The destination folder path"
+        }
+      }
+    },
+    "move-folder": {
+      "resource": "folder",
+      "operation": "move",
+      "name": "Move",
+      "action": "Move a folder",
+      "description": "Move a folder to another location",
+      "bodyFields": {
+        "sourceFolderPath": {
+          "displayName": "Source Folder Path",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The full path of the folder to move"
+        },
+        "destinationPath": {
+          "displayName": "Destination Path",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The destination folder path"
+        }
+      }
+    },
+    "rename-folder": {
+      "resource": "folder",
+      "operation": "rename",
+      "name": "Rename",
+      "action": "Rename a folder",
+      "description": "Rename a folder",
+      "bodyFields": {
+        "sourceFolderPath": {
+          "displayName": "Source Folder Path",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The full path of the folder to rename"
+        },
+        "newFolderName": {
+          "displayName": "New Folder Name",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The new name for the folder"
+        },
+        "purgeCache": {
+          "displayName": "Purge Cache",
+          "type": "boolean",
+          "required": false,
+          "default": true,
+          "description": "Whether to purge CDN cache for the old folder path"
+        }
+      }
+    },
+    "bulk-job-status": {
+      "resource": "folder",
+      "operation": "getJobStatus",
+      "name": "Get Job Status",
+      "action": "Get bulk job status",
+      "description": "Get the status of a bulk folder operation job",
+      "pathParams": {
+        "jobId": { "name": "jobId", "displayName": "Job ID", "description": "The ID of the bulk job to check status for" }
+      }
+    },
+
+    "get-uploaded-file-metadata": {
+      "resource": "metadata",
+      "operation": "getByFileId",
+      "name": "Get by File ID",
+      "action": "Get metadata by file ID",
+      "description": "Get metadata of a file by its ID",
+      "pathParams": {
+        "fileId": { "name": "fileId", "displayName": "File ID", "description": "The unique ID of the file" }
+      }
+    },
+    "get-metadata-from-url": {
+      "resource": "metadata",
+      "operation": "getFromUrl",
+      "name": "Get From URL",
+      "action": "Get metadata from URL",
+      "description": "Get metadata of a file from its remote URL",
+      "queryParams": {
+        "url": {
+          "displayName": "URL",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The remote URL of the file to get metadata for"
+        }
+      }
+    },
+
+    "purge-cache": {
+      "resource": "purgeCache",
+      "operation": "purge",
+      "name": "Purge",
+      "action": "Purge cache",
+      "description": "Purge cache for a file URL",
+      "bodyFields": {
+        "url": {
+          "displayName": "URL",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The URL of the file to purge from cache"
+        }
+      }
+    },
+    "purge-status": {
+      "resource": "purgeCache",
+      "operation": "getStatus",
+      "name": "Get Purge Status",
+      "action": "Get purge status",
+      "description": "Get the status of a purge request",
+      "pathParams": {
+        "requestId": { "name": "requestId", "displayName": "Request ID", "description": "The request ID returned from a purge request" }
+      }
+    },
+
+    "list-extensions": {
+      "resource": "savedExtension",
+      "operation": "list",
+      "name": "List",
+      "action": "List saved extensions",
+      "description": "List all saved extensions"
+    },
+    "create-extension": {
+      "resource": "savedExtension",
+      "operation": "create",
+      "name": "Create",
+      "action": "Create a saved extension",
+      "description": "Create a new saved extension",
+      "body": {
+        "name": "extensionData",
+        "displayName": "Extension Data (JSON)",
+        "description": "JSON object with saved extension configuration"
+      }
+    },
+    "get-extension": {
+      "resource": "savedExtension",
+      "operation": "get",
+      "name": "Get",
+      "action": "Get a saved extension",
+      "description": "Get details of a specific saved extension",
+      "pathParams": {
+        "id": { "name": "extensionId", "displayName": "Extension ID", "description": "The ID of the saved extension to get" }
+      }
+    },
+    "update-extension": {
+      "resource": "savedExtension",
+      "operation": "update",
+      "name": "Update",
+      "action": "Update a saved extension",
+      "description": "Update an existing saved extension",
+      "pathParams": {
+        "id": { "name": "extensionId", "displayName": "Extension ID", "description": "The ID of the saved extension to update" }
+      },
+      "body": {
+        "name": "extensionData",
+        "displayName": "Extension Data (JSON)",
+        "description": "JSON object with saved extension configuration to update"
+      }
+    },
+    "delete-extension": {
+      "resource": "savedExtension",
+      "operation": "delete",
+      "name": "Delete",
+      "action": "Delete a saved extension",
+      "description": "Delete a saved extension",
+      "pathParams": {
+        "id": { "name": "extensionId", "displayName": "Extension ID", "description": "The ID of the saved extension to delete" }
+      }
+    },
+
+    "create-new-field": {
+      "resource": "customMetadataFields",
+      "operation": "create",
+      "name": "Create",
+      "action": "Create a custom metadata field",
+      "description": "Create a new custom metadata field",
+      "bodyFields": {
+        "fieldName": {
+          "displayName": "Name",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The name of the custom metadata field",
+          "bodyKey": "name"
+        },
+        "label": {
+          "displayName": "Label",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The label of the custom metadata field"
+        },
+        "schema": {
+          "displayName": "Schema (JSON)",
+          "type": "json",
+          "required": true,
+          "default": "{\"type\": \"Text\"}",
+          "description": "The schema of the custom metadata field as a JSON object. Must include a \"type\" property."
+        }
+      }
+    },
+    "list-all-fields": {
+      "resource": "customMetadataFields",
+      "operation": "list",
+      "name": "List",
+      "action": "List custom metadata fields",
+      "description": "List all custom metadata fields",
+      "queryParams": {
+        "includeDeleted": {
+          "displayName": "Include Deleted",
+          "type": "boolean",
+          "required": false,
+          "default": false,
+          "omitWhenDefault": true,
+          "description": "Whether to include deleted custom metadata fields"
+        }
+      }
+    },
+    "update-existing-field": {
+      "resource": "customMetadataFields",
+      "operation": "update",
+      "name": "Update",
+      "action": "Update a custom metadata field",
+      "description": "Update an existing custom metadata field",
+      "pathParams": {
+        "id": { "name": "fieldId", "displayName": "Field ID", "description": "The ID of the custom metadata field to update" }
+      },
+      "body": {
+        "name": "updateBody",
+        "displayName": "Update Fields (JSON)",
+        "description": "JSON object with fields to update (e.g. label, schema)"
+      }
+    },
+    "delete-a-field": {
+      "resource": "customMetadataFields",
+      "operation": "delete",
+      "name": "Delete",
+      "action": "Delete a custom metadata field",
+      "description": "Delete a custom metadata field",
+      "pathParams": {
+        "id": { "name": "fieldId", "displayName": "Field ID", "description": "The ID of the custom metadata field to delete" }
+      }
+    },
+
+    "get-file-details": {
+      "resource": "file",
+      "operation": "get",
+      "name": "Get Details",
+      "action": "Get file details",
+      "description": "Get details of a file by its ID",
+      "pathParams": {
+        "fileId": { "name": "fileId", "displayName": "File ID", "description": "The unique ID of the file" }
+      }
+    },
+    "delete-file": {
+      "resource": "file",
+      "operation": "delete",
+      "name": "Delete",
+      "action": "Delete a file",
+      "description": "Delete a file by its ID",
+      "pathParams": {
+        "fileId": { "name": "fileId", "displayName": "File ID", "description": "The unique ID of the file to delete" }
+      }
+    },
+    "copy-file": {
+      "resource": "file",
+      "operation": "copy",
+      "name": "Copy",
+      "action": "Copy a file",
+      "description": "Copy a file to another location",
+      "bodyFields": {
+        "sourceFilePath": {
+          "displayName": "Source File Path",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The full path of the file to copy (e.g. /path/to/file.jpg)"
+        },
+        "destinationPath": {
+          "displayName": "Destination Path",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The folder path where the file should be copied to"
+        },
+        "includeFileVersions": {
+          "displayName": "Include File Versions",
+          "type": "boolean",
+          "required": false,
+          "default": false,
+          "description": "Whether to copy all file versions"
+        }
+      }
+    },
+    "move-file": {
+      "resource": "file",
+      "operation": "move",
+      "name": "Move",
+      "action": "Move a file",
+      "description": "Move a file to another location",
+      "bodyFields": {
+        "sourceFilePath": {
+          "displayName": "Source File Path",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The full path of the file to move (e.g. /path/to/file.jpg)"
+        },
+        "destinationPath": {
+          "displayName": "Destination Path",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The folder path where the file should be moved to"
+        }
+      }
+    },
+    "rename-file": {
+      "resource": "file",
+      "operation": "rename",
+      "name": "Rename",
+      "action": "Rename a file",
+      "description": "Rename a file",
+      "bodyFields": {
+        "filePath": {
+          "displayName": "File Path",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The full path of the file to rename (e.g. /path/to/file.jpg)"
+        },
+        "newFileName": {
+          "displayName": "New File Name",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The new name for the file"
+        },
+        "purgeCache": {
+          "displayName": "Purge Cache",
+          "type": "boolean",
+          "required": false,
+          "default": true,
+          "description": "Whether to purge CDN cache for the old file URL"
+        }
+      }
+    },
+    "delete-multiple-files": {
+      "resource": "file",
+      "operation": "bulkDelete",
+      "name": "Bulk Delete",
+      "action": "Bulk delete files",
+      "description": "Delete multiple files by their IDs",
+      "bodyFields": {
+        "fileIds": {
+          "displayName": "File IDs",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "transform": "csv",
+          "description": "Comma-separated list of file IDs to delete"
+        }
+      }
+    },
+    "add-tags-bulk": {
+      "resource": "file",
+      "operation": "bulkAddTags",
+      "name": "Bulk Add Tags",
+      "action": "Bulk add tags to files",
+      "description": "Add tags to multiple files",
+      "bodyFields": {
+        "fileIds": {
+          "displayName": "File IDs",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "transform": "csv",
+          "description": "Comma-separated list of file IDs to add tags to"
+        },
+        "tags": {
+          "displayName": "Tags",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "transform": "csv",
+          "description": "Comma-separated list of tags to add"
+        }
+      }
+    },
+    "remove-tags-bulk": {
+      "resource": "file",
+      "operation": "bulkRemoveTags",
+      "name": "Bulk Remove Tags",
+      "action": "Bulk remove tags from files",
+      "description": "Remove tags from multiple files",
+      "bodyFields": {
+        "fileIds": {
+          "displayName": "File IDs",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "transform": "csv",
+          "description": "Comma-separated list of file IDs to remove tags from"
+        },
+        "tags": {
+          "displayName": "Tags",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "transform": "csv",
+          "description": "Comma-separated list of tags to remove"
+        }
+      }
+    },
+    "remove-ai-tags-bulk": {
+      "resource": "file",
+      "operation": "bulkRemoveAITags",
+      "name": "Bulk Remove AI Tags",
+      "action": "Bulk remove AI tags from files",
+      "description": "Remove AI tags from multiple files",
+      "bodyFields": {
+        "fileIds": {
+          "displayName": "File IDs",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "transform": "csv",
+          "description": "Comma-separated list of file IDs to remove AI tags from"
+        },
+        "tags": {
+          "displayName": "AI Tags",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "transform": "csv",
+          "description": "Comma-separated list of AI tags to remove"
+        }
+      }
+    }
+  },
+  "_triggers_comment": "Webhook trigger nodes generated from the spec's top-level `webhooks:` section. Each entry produces one INodeType under nodes/Imagekit/triggers/_generated/<name>Trigger.node.ts. `events` lists the OpenAPI operationIds; the generator resolves each to the actual event-name path key (e.g. `file-created` -> `file.created`). All triggers share the hand-written verifySignature helper and the ImagekitWebhookApi credential.",
+  "triggers": {
+    "file": {
+      "displayName": "File",
+      "description": "Triggers when files are created, updated, or deleted in your ImageKit Media Library",
+      "events": ["file-created", "file-updated", "file-deleted"]
+    },
+    "fileVersion": {
+      "displayName": "File Version",
+      "description": "Triggers when file versions are created or deleted",
+      "events": ["file-version-created", "file-version-deleted"]
+    },
+    "uploadPreTransform": {
+      "displayName": "Upload Pre-Transform",
+      "description": "Triggers on the outcome of pre-transformations applied during upload",
+      "events": ["upload-pre-transform-success", "upload-pre-transform-error"]
+    },
+    "uploadPostTransform": {
+      "displayName": "Upload Post-Transform",
+      "description": "Triggers on the outcome of post-transformations applied after upload",
+      "events": ["upload-post-transform-success", "upload-post-transform-error"]
+    },
+    "videoTransformation": {
+      "displayName": "Video Transformation",
+      "description": "Triggers on the lifecycle events of a video transformation job",
+      "events": [
+        "video-transformation-accepted",
+        "video-transformation-ready",
+        "video-transformation-error"
+      ]
+    }
+  }
+}

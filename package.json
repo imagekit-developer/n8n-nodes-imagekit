@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "n8n community node for the ImageKit Media APIs",
   "license": "MIT",
-  "homepage": "https://github.com/ahnvd/n8n-nodes-imagekit",
+  "homepage": "https://github.com/ahnv/n8n-nodes-imagekit",
   "keywords": [
     "n8n-community-node-package",
     "imagekit",
@@ -19,15 +19,17 @@
     "url": "git+https://github.com/ahnv/n8n-nodes-imagekit.git"
   },
   "scripts": {
-    "build": "n8n-node build",
+    "build": "rm -rf dist && n8n-node build",
     "build:watch": "tsc --watch",
-    "dev": "n8n-node dev",
+    "dev": "rm -rf dist && n8n-node dev",
     "lint": "n8n-node lint",
     "lint:fix": "n8n-node lint --fix",
     "release": "n8n-node release",
     "prepublishOnly": "n8n-node prerelease",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "generate": "tsx scripts/generate.ts",
+    "generate:check": "tsx scripts/generate.ts && git diff --exit-code -- nodes/Imagekit/resources/_generated nodes/Imagekit/ImagekitTrigger.node.ts openapi/config.json"
   },
   "files": [
     "dist"
@@ -35,27 +37,29 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/ImagekitApi.credentials.js"
+      "dist/credentials/ImagekitApi.credentials.js",
+      "dist/credentials/ImagekitWebhookApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/Imagekit/Imagekit.node.js"
+      "dist/nodes/Imagekit/Imagekit.node.js",
+      "dist/nodes/Imagekit/ImagekitTrigger.node.js"
     ]
   },
   "devDependencies": {
     "@n8n/node-cli": "*",
     "@types/jest": "^30.0.0",
+    "@types/js-yaml": "^4.0.9",
     "eslint": "9.32.0",
     "jest": "^30.3.0",
+    "js-yaml": "^4.1.1",
     "prettier": "3.6.2",
     "release-it": "^19.0.4",
     "ts-jest": "^29.4.6",
+    "tsx": "^4.21.0",
     "typescript": "5.9.2"
   },
   "peerDependencies": {
     "n8n-workflow": "*"
-  },
-  "dependencies": {
-    "imagekit": "^6.0.0"
   },
   "publishConfig": {
     "access": "public"

@@ -1,4 +1,4 @@
-import { renameFile } from '../../../nodes/Imagekit/resources/file/rename';
+import { executeFile } from "../../../nodes/Imagekit/resources/_generated/file";
 import { createMockExecuteFunctions } from '../../helpers/mockExecuteFunctions';
 
 describe('renameFile', () => {
@@ -6,6 +6,7 @@ describe('renameFile', () => {
 		const mockResponse = { purgeRequestId: 'purge123' };
 		const context = createMockExecuteFunctions({
 			nodeParameters: {
+					operation: "rename",
 				filePath: '/images/old-name.jpg',
 				newFileName: 'new-name.jpg',
 				purgeCache: true,
@@ -13,7 +14,7 @@ describe('renameFile', () => {
 			httpResponse: mockResponse,
 		});
 
-		const result = await renameFile.call(context, 0);
+		const result = await executeFile.call(context, 0);
 
 		expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
 			'imagekitApi',
@@ -34,6 +35,7 @@ describe('renameFile', () => {
 	it('should support purgeCache set to false', async () => {
 		const context = createMockExecuteFunctions({
 			nodeParameters: {
+					operation: "rename",
 				filePath: '/images/file.jpg',
 				newFileName: 'renamed.jpg',
 				purgeCache: false,
@@ -41,7 +43,7 @@ describe('renameFile', () => {
 			httpResponse: {},
 		});
 
-		await renameFile.call(context, 0);
+		await executeFile.call(context, 0);
 
 		expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
 			'imagekitApi',

@@ -1,0 +1,3 @@
+[submodule "vendor/sdk-generation"]
+	path = vendor/sdk-generation
+	url = https://github.com/imagekit-developer/sdk-generation.git

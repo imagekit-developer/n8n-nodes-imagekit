@@ -1,26 +1,25 @@
-import type {
-	IExecuteFunctions,
-	INodeExecutionData,
-	INodeProperties,
-} from 'n8n-workflow';
-import { fileUploadDescription, uploadFile } from './upload';
-import { fileGetDescription, getFile } from './get';
-import { fileUpdateDescription, updateFile } from './update';
-import { fileDeleteDescription, deleteFile } from './delete';
-import { fileCopyDescription, copyFile } from './copy';
-import { fileMoveDescription, moveFile } from './move';
-import { fileRenameDescription, renameFile } from './rename';
+// Splicer for the `file` resource: composes the 9 codegen'd ops in
+// `_generated/file` with the 2 hand-written ones (`upload`, `update`)
+// that involve binary-data handling and a complex `collection` UI which
+// the generator doesn't yet support. See `openapi/config.json` for the
+// full op list and `openapi/README.md` for the codegen rules.
+import type { IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import {
-	fileBulkDescription,
-	bulkDeleteFiles,
-	bulkAddTags,
-	bulkRemoveTags,
-	bulkRemoveAITags,
-} from './bulk';
+	fileDescription as generatedFileDescription,
+	executeFile as executeGeneratedFile,
+} from '../_generated/file';
+import { fileUploadDescription, uploadFile } from './upload';
+import { fileUpdateDescription, updateFile } from './update';
 
 const showOnlyForFile = {
 	resource: ['file'],
 };
+
+// Drop the generated operation switcher (always at index 0) so we can
+// supply our own that also lists `upload` and `update`. The remaining
+// generated entries are per-op fields, each already gated by its own
+// `displayOptions.show.operation`, so they slot in unchanged.
+const generatedFieldsOnly = generatedFileDescription.slice(1);
 
 export const fileDescription: INodeProperties[] = [
 	{
@@ -28,9 +27,7 @@ export const fileDescription: INodeProperties[] = [
 		name: 'operation',
 		type: 'options',
 		noDataExpression: true,
-		displayOptions: {
-			show: showOnlyForFile,
-		},
+		displayOptions: { show: showOnlyForFile },
 		options: [
 			{
 				name: 'Bulk Add Tags',
@@ -101,43 +98,17 @@ export const fileDescription: INodeProperties[] = [
 		],
 		default: 'upload',
 	},
+	...generatedFieldsOnly,
 	...fileUploadDescription,
-	...fileGetDescription,
 	...fileUpdateDescription,
-	...fileDeleteDescription,
-	...fileCopyDescription,
-	...fileMoveDescription,
-	...fileRenameDescription,
-	...fileBulkDescription,
 ];
 
-export async function executeFile(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
+export async function executeFile(
+	this: IExecuteFunctions,
+	i: number,
+): Promise<INodeExecutionData[]> {
 	const operation = this.getNodeParameter('operation', i) as string;
-
-	switch (operation) {
-		case 'upload':
-			return uploadFile.call(this, i);
-		case 'get':
-			return getFile.call(this, i);
-		case 'update':
-			return updateFile.call(this, i);
-		case 'delete':
-			return deleteFile.call(this, i);
-		case 'copy':
-			return copyFile.call(this, i);
-		case 'move':
-			return moveFile.call(this, i);
-		case 'rename':
-			return renameFile.call(this, i);
-		case 'bulkDelete':
-			return bulkDeleteFiles.call(this, i);
-		case 'bulkAddTags':
-			return bulkAddTags.call(this, i);
-		case 'bulkRemoveTags':
-			return bulkRemoveTags.call(this, i);
-		case 'bulkRemoveAITags':
-			return bulkRemoveAITags.call(this, i);
-		default:
-			throw new Error(`Unsupported file operation: ${operation}`);
-	}
+	if (operation === 'upload') return uploadFile.call(this, i);
+	if (operation === 'update') return updateFile.call(this, i);
+	return executeGeneratedFile.call(this, i);
 }

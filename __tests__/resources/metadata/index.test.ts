@@ -1,4 +1,4 @@
-import { executeMetadata } from '../../../nodes/Imagekit/resources/metadata/index';
+import { executeMetadata } from '../../../nodes/Imagekit/resources/_generated/metadata';
 import { createMockExecuteFunctions } from '../../helpers/mockExecuteFunctions';
 
 describe('executeMetadata', () => {

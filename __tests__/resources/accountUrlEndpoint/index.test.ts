@@ -1,4 +1,4 @@
-import { executeAccountUrlEndpoint } from '../../../nodes/Imagekit/resources/accountUrlEndpoint/index';
+import { executeAccountUrlEndpoint } from '../../../nodes/Imagekit/resources/_generated/accountUrlEndpoint';
 import { createMockExecuteFunctions } from '../../helpers/mockExecuteFunctions';
 
 describe('executeAccountUrlEndpoint', () => {

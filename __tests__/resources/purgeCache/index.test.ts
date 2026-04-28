@@ -1,4 +1,4 @@
-import { executePurgeCache } from '../../../nodes/Imagekit/resources/purgeCache/index';
+import { executePurgeCache } from '../../../nodes/Imagekit/resources/_generated/purgeCache';
 import { createMockExecuteFunctions } from '../../helpers/mockExecuteFunctions';
 
 describe('executePurgeCache', () => {

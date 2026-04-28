@@ -1,4 +1,4 @@
-import { executeAccount } from '../../../nodes/Imagekit/resources/account/index';
+import { executeAccount } from '../../../nodes/Imagekit/resources/_generated/account';
 import { createMockExecuteFunctions } from '../../helpers/mockExecuteFunctions';
 
 describe('executeAccount', () => {

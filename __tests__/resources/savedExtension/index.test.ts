@@ -1,4 +1,4 @@
-import { executeSavedExtension } from '../../../nodes/Imagekit/resources/savedExtension/index';
+import { executeSavedExtension } from '../../../nodes/Imagekit/resources/_generated/savedExtension';
 import { createMockExecuteFunctions } from '../../helpers/mockExecuteFunctions';
 
 describe('executeSavedExtension', () => {

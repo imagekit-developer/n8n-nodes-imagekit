@@ -1,4 +1,4 @@
-import { copyFile } from '../../../nodes/Imagekit/resources/file/copy';
+import { executeFile } from "../../../nodes/Imagekit/resources/_generated/file";
 import { createMockExecuteFunctions } from '../../helpers/mockExecuteFunctions';
 
 describe('copyFile', () => {
@@ -6,6 +6,7 @@ describe('copyFile', () => {
 		const mockResponse = { jobId: 'job123' };
 		const context = createMockExecuteFunctions({
 			nodeParameters: {
+					operation: "copy",
 				sourceFilePath: '/images/photo.jpg',
 				destinationPath: '/backup/',
 				includeFileVersions: true,
@@ -13,7 +14,7 @@ describe('copyFile', () => {
 			httpResponse: mockResponse,
 		});
 
-		const result = await copyFile.call(context, 0);
+		const result = await executeFile.call(context, 0);
 
 		expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
 			'imagekitApi',

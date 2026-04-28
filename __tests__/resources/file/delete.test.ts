@@ -1,13 +1,13 @@
-import { deleteFile } from '../../../nodes/Imagekit/resources/file/delete';
+import { executeFile } from "../../../nodes/Imagekit/resources/_generated/file";
 import { createMockExecuteFunctions } from '../../helpers/mockExecuteFunctions';
 
 describe('deleteFile', () => {
 	it('should call DELETE on the correct endpoint', async () => {
 		const context = createMockExecuteFunctions({
-			nodeParameters: { fileId: 'file123' },
+			nodeParameters: { operation: "delete", fileId: 'file123' },
 		});
 
-		const result = await deleteFile.call(context, 0);
+		const result = await executeFile.call(context, 0);
 
 		expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
 			'imagekitApi',

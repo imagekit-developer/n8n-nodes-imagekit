@@ -1,4 +1,4 @@
-import { executeFolder } from '../../../nodes/Imagekit/resources/folder/index';
+import { executeFolder } from '../../../nodes/Imagekit/resources/_generated/folder';
 import { createMockExecuteFunctions } from '../../helpers/mockExecuteFunctions';
 
 describe('executeFolder', () => {

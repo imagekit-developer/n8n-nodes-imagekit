@@ -1,7 +1,5 @@
 # n8n-nodes-imagekit
 
-> ⚠️ **Work in Progress** - This node is currently under active development. Some features may be incomplete or subject to change.
-
 This is an n8n community node that lets you use [ImageKit](https://imagekit.io/) in your n8n workflows.
 
 ImageKit is a complete media management solution that provides real-time image and video optimization, transformation, and delivery through a global CDN. This node allows you to integrate ImageKit's powerful media APIs directly into your n8n automation workflows.
