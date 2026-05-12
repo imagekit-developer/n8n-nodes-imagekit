@@ -26,7 +26,7 @@ describe('listAssets', () => {
 				qs: expect.objectContaining({
 					limit: 10,
 					skip: 0,
-					sort: 'asc_name',
+					sort: 'ASC_NAME',
 				}),
 			}),
 		);
@@ -58,7 +58,7 @@ describe('listAssets', () => {
 				qs: expect.objectContaining({
 					limit: 50,
 					skip: 5,
-					sort: 'desc_created',
+					sort: 'DESC_CREATED',
 					path: '/images',
 					fileType: 'image',
 					type: 'file',

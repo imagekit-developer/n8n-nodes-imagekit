@@ -104,9 +104,43 @@ export const fileUploadDescription: INodeProperties[] = [
 			{
 				displayName: 'Response Fields',
 				name: 'responseFields',
-				type: 'string',
-				default: '',
-				description: 'Comma-separated list of fields to include in the response',
+				type: 'multiOptions',
+				options: [
+					{
+						name: 'Custom Coordinates',
+						value: 'customCoordinates',
+					},
+					{
+						name: 'Custom Metadata',
+						value: 'customMetadata',
+					},
+					{
+						name: 'Embedded Metadata',
+						value: 'embeddedMetadata',
+					},
+					{
+						name: 'Is Private File',
+						value: 'isPrivateFile',
+					},
+					{
+						name: 'Is Published',
+						value: 'isPublished',
+					},
+					{
+						name: 'Metadata',
+						value: 'metadata',
+					},
+					{
+						name: 'Selected Fields Schema',
+						value: 'selectedFieldsSchema',
+					},
+					{
+						name: 'Tags',
+						value: 'tags',
+					},
+				],
+				default: [],
+				description: 'Response field keys to include in the API response body',
 			},
 			{
 				displayName: 'Tags',
@@ -168,7 +202,7 @@ export async function uploadFile(
 		body.customCoordinates = uploadOptions.customCoordinates;
 	}
 	if (uploadOptions.responseFields) {
-		body.responseFields = (uploadOptions.responseFields as string).split(',').map((f: string) => f.trim());
+		body.responseFields = uploadOptions.responseFields;
 	}
 	if (uploadOptions.overwriteFile !== undefined) {
 		body.overwriteFile = uploadOptions.overwriteFile;

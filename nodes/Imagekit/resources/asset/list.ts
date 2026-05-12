@@ -166,7 +166,7 @@ export async function listAssets(
 	const sortDirection = this.getNodeParameter('sortDirection', i) as string;
 	const additionalOptions = this.getNodeParameter('additionalOptions', i) as IDataObject;
 
-	const sort = `${sortDirection}_${sortBy}`;
+	const sort = `${sortDirection}_${sortBy}`.toUpperCase();
 
 	const qs: IDataObject = {
 		limit,
