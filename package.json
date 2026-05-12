@@ -16,9 +16,16 @@
     "digital-asset-management"
   ],
   "author": {
-    "name": "Abhinav Dhiman",
-    "email": "dhiman.ahnv@gmail.com"
+    "name": "ImageKit",
+    "email": "developer@imagekit.io",
+    "url": "https://imagekit.io"
   },
+  "contributors": [
+    {
+      "name": "Abhinav Dhiman",
+      "email": "abhinav@imagekit.io"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/imagekit-developer/n8n-nodes-imagekit.git"
