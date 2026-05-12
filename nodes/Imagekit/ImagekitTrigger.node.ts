@@ -46,7 +46,6 @@ export class ImagekitTrigger implements INodeType {
 				// usage of a credential to declare either an HTTP test or a testedBy
 				// reference, since webhook signing secrets can't be remotely validated.
 				testedBy: 'imagekitWebhookSecretTest',
-				displayOptions: { show: { verifySignature: [true] } },
 			},
 		],
 		webhooks: [
