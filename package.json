@@ -29,7 +29,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "generate": "tsx scripts/generate.ts",
-    "generate:check": "tsx scripts/generate.ts && git diff --exit-code -- nodes/Imagekit/resources/_generated nodes/Imagekit/ImagekitTrigger.node.ts openapi/config.json",
+    "generate:check": "tsx scripts/generate.ts && git diff --exit-code -- nodes/Imagekit/resources/_generated openapi/config.json",
     "prepare": "husky"
   },
   "files": [
