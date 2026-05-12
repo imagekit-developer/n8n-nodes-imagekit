@@ -29,7 +29,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "generate": "tsx scripts/generate.ts",
-    "generate:check": "tsx scripts/generate.ts && git diff --exit-code -- nodes/Imagekit/resources/_generated nodes/Imagekit/ImagekitTrigger.node.ts openapi/config.json"
+    "generate:check": "tsx scripts/generate.ts && git diff --exit-code -- nodes/Imagekit/resources/_generated nodes/Imagekit/ImagekitTrigger.node.ts openapi/config.json",
+    "prepare": "husky"
   },
   "files": [
     "dist"
@@ -46,10 +47,14 @@
     ]
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.0.0",
+    "@commitlint/config-conventional": "^21.0.0",
     "@n8n/node-cli": "^0.28.0",
+    "@release-it/conventional-changelog": "^11.0.0",
     "@types/jest": "^30.0.0",
     "@types/js-yaml": "^4.0.9",
     "eslint": "9.32.0",
+    "husky": "^9.1.7",
     "jest": "^30.3.0",
     "js-yaml": "^4.1.1",
     "prettier": "3.6.2",
