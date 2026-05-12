@@ -16,7 +16,7 @@ export class ImagekitApi implements ICredentialType {
 		dark: 'file:../nodes/Imagekit/imagekit.dark.svg',
 	} satisfies Icon;
 
-	documentationUrl = 'https://github.com/ahnv/n8n-nodes-imagekit/#credentials';
+	documentationUrl = 'https://imagekit.io/docs/api-keys';
 
 	properties: INodeProperties[] = [
 		{

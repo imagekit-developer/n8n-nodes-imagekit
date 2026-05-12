@@ -1,6 +1,6 @@
 # Development
 
-This guide covers the local development workflow for `@ahnv/n8n-nodes-imagekit`.
+This guide covers the local development workflow for `@imagekit/n8n-nodes-imagekit`.
 
 ## Requirements
 
@@ -109,8 +109,8 @@ This updates the version, updates `CHANGELOG.md`, creates a git tag, and creates
 
 The npm package uses OIDC Trusted Publishing. The npm Trusted Publisher entry must match the workflow filename exactly:
 
-- Repository: `ahnv/n8n-nodes-imagekit`
-- Workflow: `publish.yml`
+- Repository: `imagekit-developer/n8n-nodes-imagekit`
+- Workflow: `release.yml`
 - Environment: blank
 
 ## Before pushing

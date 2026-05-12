@@ -1,14 +1,19 @@
 {
-  "name": "@ahnv/n8n-nodes-imagekit",
+  "name": "@imagekit/n8n-nodes-imagekit",
   "version": "0.0.3",
   "description": "n8n community node for the ImageKit Media APIs",
   "license": "MIT",
-  "homepage": "https://github.com/ahnv/n8n-nodes-imagekit",
+  "homepage": "https://github.com/imagekit-developer/n8n-nodes-imagekit",
   "keywords": [
     "n8n-community-node-package",
     "imagekit",
-    "media",
-    "storage"
+    "image-upload",
+    "media-management",
+    "tags",
+    "metadata",
+    "cloud-storage",
+    "image-optimization",
+    "digital-asset-management"
   ],
   "author": {
     "name": "Abhinav Dhiman",
@@ -16,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ahnv/n8n-nodes-imagekit.git"
+    "url": "git+https://github.com/imagekit-developer/n8n-nodes-imagekit.git"
   },
   "scripts": {
     "build": "rm -rf dist && n8n-node build",

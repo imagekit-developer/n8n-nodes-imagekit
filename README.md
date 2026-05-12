@@ -2,7 +2,7 @@
 
 # ImageKit.io n8n Community Node
 
-[![npm version](https://img.shields.io/npm/v/@ahnv/n8n-nodes-imagekit)](https://www.npmjs.com/package/@ahnv/n8n-nodes-imagekit)
+[![npm version](https://img.shields.io/npm/v/@imagekit/n8n-nodes-imagekit)](https://www.npmjs.com/package/@imagekit/n8n-nodes-imagekit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![n8n Community Node](https://img.shields.io/badge/n8n-community%20node-FF6D5A)](https://docs.n8n.io/integrations/community-nodes/)
 [![Twitter Follow](https://img.shields.io/twitter/follow/imagekitio?label=Follow&style=social)](https://twitter.com/ImagekitIo)
@@ -23,7 +23,7 @@ You can install the node in n8n using the community nodes UI.
 4. Enter the package name:
 
 ```bash
-@ahnv/n8n-nodes-imagekit
+@imagekit/n8n-nodes-imagekit
 ```
 
 5. Select **Install** and restart n8n if your deployment requires it.
