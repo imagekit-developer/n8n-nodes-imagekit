@@ -1,4 +1,12 @@
-### Changelog
+# Changelog
+
+## [0.0.3](https://github.com/ahnv/n8n-nodes-imagekit/compare/0.0.2...0.0.3) (2026-05-12)
+
+### Bug Fixes
+
+* **trigger:** remove conditional display of webhook credential ([185e0fb](https://github.com/ahnv/n8n-nodes-imagekit/commit/185e0fb5c9c56dda948b1a2ccb4fbc1c91b31e91))
+
+##
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
