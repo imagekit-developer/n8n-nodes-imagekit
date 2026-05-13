@@ -89,7 +89,7 @@ describe('bulkRemoveAITags', () => {
 			nodeParameters: {
 				operation: 'bulkRemoveAITags',
 				fileIds: 'id1, id2',
-				tags: 'ai-tag1, ai-tag2',
+				AITags: 'ai-tag1, ai-tag2',
 			},
 			httpResponse: mockResponse,
 		});
@@ -103,7 +103,7 @@ describe('bulkRemoveAITags', () => {
 				url: '/v1/files/removeAITags',
 				body: {
 					fileIds: ['id1', 'id2'],
-					tags: ['ai-tag1', 'ai-tag2'],
+					AITags: ['ai-tag1', 'ai-tag2'],
 				},
 			}),
 		);

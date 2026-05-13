@@ -276,7 +276,7 @@ export const fileDescription: INodeProperties[] = [
 	},
 	{
 		displayName: 'AI Tags',
-		name: 'tags',
+		name: 'AITags',
 		type: 'string',
 		required: true,
 		default: '',
@@ -428,12 +428,12 @@ export async function executeFile(
 			const fileIds = (this.getNodeParameter('fileIds', i) as string)
 				.split(',')
 				.map((s) => s.trim());
-			const tags = (this.getNodeParameter('tags', i) as string).split(',').map((s) => s.trim());
+			const AITags = (this.getNodeParameter('AITags', i) as string).split(',').map((s) => s.trim());
 			options = {
 				method: 'POST',
 				baseURL: 'https://api.imagekit.io',
 				url: '/v1/files/removeAITags',
-				body: { fileIds, tags },
+				body: { fileIds, AITags },
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,

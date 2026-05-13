@@ -745,7 +745,7 @@
           "transform": "csv",
           "description": "Comma-separated list of file IDs to remove AI tags from"
         },
-        "tags": {
+        "AITags": {
           "displayName": "AI Tags",
           "type": "string",
           "required": true,
