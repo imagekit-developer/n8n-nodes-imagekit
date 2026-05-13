@@ -13,6 +13,19 @@ const showOnlyForFileUpload = {
 
 export const fileUploadDescription: INodeProperties[] = [
 	{
+		displayName: 'API Version',
+		name: 'apiVersion',
+		type: 'options',
+		options: [
+			{ name: 'V1 (Stable)', value: 'v1' },
+			{ name: 'V2 (Beta)', value: 'v2' },
+		],
+		default: 'v1',
+		description:
+			'Version of the upload API to use',
+		displayOptions: { show: showOnlyForFileUpload },
+	},
+	{
 		displayName: 'Input Data Field Name',
 		name: 'binaryPropertyName',
 		type: 'string',
@@ -164,67 +177,82 @@ export async function uploadFile(
 	this: IExecuteFunctions,
 	i: number,
 ): Promise<INodeExecutionData[]> {
+	const apiVersion = (this.getNodeParameter('apiVersion', i, 'v1') as 'v1' | 'v2');
 	const fileName = this.getNodeParameter('fileName', i) as string;
 	const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i) as string;
 	const fileUrl = this.getNodeParameter('fileUrl', i) as string;
 	const uploadOptions = this.getNodeParameter('uploadOptions', i) as IDataObject;
 
-	const body: IDataObject = {
-		fileName,
-	};
+	const formData = new FormData();
+	let resolvedFileName = fileName;
+	let attached = false;
 
-	if (binaryPropertyName && this.helpers.assertBinaryData(i, binaryPropertyName)) {
+	if (binaryPropertyName) {
 		const binaryData = this.helpers.assertBinaryData(i, binaryPropertyName);
 		const dataBuffer = await this.helpers.getBinaryDataBuffer(i, binaryPropertyName);
-		body.file = dataBuffer.toString('base64');
-		if (!fileName && binaryData.fileName) {
-			body.fileName = binaryData.fileName;
+		if (!resolvedFileName && binaryData.fileName) {
+			resolvedFileName = binaryData.fileName;
 		}
+		const blob = new Blob([new Uint8Array(dataBuffer)], {
+			type: binaryData.mimeType || 'application/octet-stream',
+		});
+		formData.append('file', blob, resolvedFileName || binaryData.fileName);
+		attached = true;
 	} else if (fileUrl) {
-		body.file = fileUrl;
-	} else {
+		formData.append('file', fileUrl);
+		attached = true;
+	}
+
+	if (!attached) {
 		throw new Error('Either binary data or a file URL must be provided for upload.');
 	}
 
+	formData.append('fileName', resolvedFileName);
+
 	if (uploadOptions.useUniqueFileName !== undefined) {
-		body.useUniqueFileName = uploadOptions.useUniqueFileName;
+		formData.append('useUniqueFileName', String(uploadOptions.useUniqueFileName));
 	}
 	if (uploadOptions.tags) {
-		body.tags = (uploadOptions.tags as string).split(',').map((t: string) => t.trim());
+		const tags = (uploadOptions.tags as string)
+			.split(',')
+			.map((t: string) => t.trim())
+			.filter((t) => t.length > 0)
+			.join(',');
+		if (tags) formData.append('tags', tags);
 	}
 	if (uploadOptions.folder) {
-		body.folder = uploadOptions.folder;
+		formData.append('folder', uploadOptions.folder as string);
 	}
 	if (uploadOptions.isPrivateFile !== undefined) {
-		body.isPrivateFile = uploadOptions.isPrivateFile;
+		formData.append('isPrivateFile', String(uploadOptions.isPrivateFile));
 	}
 	if (uploadOptions.customCoordinates) {
-		body.customCoordinates = uploadOptions.customCoordinates;
+		formData.append('customCoordinates', uploadOptions.customCoordinates as string);
 	}
-	if (uploadOptions.responseFields) {
-		body.responseFields = uploadOptions.responseFields;
+	if (Array.isArray(uploadOptions.responseFields) && uploadOptions.responseFields.length) {
+		formData.append('responseFields', (uploadOptions.responseFields as string[]).join(','));
 	}
 	if (uploadOptions.overwriteFile !== undefined) {
-		body.overwriteFile = uploadOptions.overwriteFile;
+		formData.append('overwriteFile', String(uploadOptions.overwriteFile));
 	}
 	if (uploadOptions.overwriteAITags !== undefined) {
-		body.overwriteAITags = uploadOptions.overwriteAITags;
+		formData.append('overwriteAITags', String(uploadOptions.overwriteAITags));
 	}
 	if (uploadOptions.overwriteTags !== undefined) {
-		body.overwriteTags = uploadOptions.overwriteTags;
+		formData.append('overwriteTags', String(uploadOptions.overwriteTags));
 	}
 	if (uploadOptions.overwriteCustomMetadata !== undefined) {
-		body.overwriteCustomMetadata = uploadOptions.overwriteCustomMetadata;
+		formData.append('overwriteCustomMetadata', String(uploadOptions.overwriteCustomMetadata));
 	}
 	if (uploadOptions.customMetadata) {
-		body.customMetadata = JSON.parse(uploadOptions.customMetadata as string);
+		formData.append('customMetadata', uploadOptions.customMetadata as string);
 	}
 
 	const options: IHttpRequestOptions = {
 		method: 'POST',
 		baseURL: 'https://upload.imagekit.io',
-		url: '/api/v1/files/upload',
-		body,
+		url: apiVersion === 'v2' ? '/api/v2/files/upload' : '/api/v1/files/upload',
+		body: formData,
 	};
 
 	const responseData = await this.helpers.httpRequestWithAuthentication.call(
