@@ -67,6 +67,33 @@ describe('listAssets', () => {
 		);
 	});
 
+	it('should include searchQuery when provided', async () => {
+		const context = createMockExecuteFunctions({
+			nodeParameters: {
+				limit: 20,
+				skip: 0,
+				sortBy: 'relevance',
+				sortDirection: 'desc',
+				additionalOptions: {
+					searchQuery: 'createdAt > "7d" AND tags IN ["sale"]',
+				},
+			},
+			httpResponse: [],
+		});
+
+		await listAssets.call(context, 0);
+
+		expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
+			'imagekitApi',
+			expect.objectContaining({
+				qs: expect.objectContaining({
+					searchQuery: 'createdAt > "7d" AND tags IN ["sale"]',
+					sort: 'DESC_RELEVANCE',
+				}),
+			}),
+		);
+	});
+
 	it('should not include fileType and type when set to all', async () => {
 		const context = createMockExecuteFunctions({
 			nodeParameters: {

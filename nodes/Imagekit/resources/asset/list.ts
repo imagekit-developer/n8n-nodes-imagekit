@@ -104,7 +104,14 @@ export const assetListDescription: INodeProperties[] = [
 				name: 'path',
 				type: 'string',
 				default: '',
-				description: 'The path of the file to list',
+				description: 'Folder path to limit the search within a specific folder, e.g. <code>/sales-banner/</code>',
+			},
+			{
+				displayName: 'Search Query',
+				name: 'searchQuery',
+				type: 'string',
+				default: '',
+				description: 'Lucene-like query string for advanced filtering, e.g. <code>createdAt &gt; "7d" AND tags IN ["sale"]</code>. When set, it overrides <code>tags</code>, <code>type</code>, and <code>name</code> filters. <a href="https://imagekit.io/docs/api-reference/digital-asset-management-dam/list-and-search-assets#advanced-search-queries">Learn more</a>.',
 			},
 			{
 				displayName: 'File Type',
@@ -177,6 +184,10 @@ export async function listAssets(
 	// Add optional parameters from additionalOptions if they have values
 	if (additionalOptions.path) {
 		qs.path = additionalOptions.path;
+	}
+
+	if (additionalOptions.searchQuery) {
+		qs.searchQuery = additionalOptions.searchQuery;
 	}
 
 	if (additionalOptions.fileType && additionalOptions.fileType !== 'all') {
