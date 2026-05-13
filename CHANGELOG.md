@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.2](https://github.com/imagekit-developer/n8n-nodes-imagekit/compare/1.0.1...1.0.2) (2026-05-13)
+
+### Features
+
+* **asset:** expose searchQuery filter on list ([7638327](https://github.com/imagekit-developer/n8n-nodes-imagekit/commit/76383272654bebd20d914205531b5d82ef63dab0))
+
+### Bug Fixes
+
+* **file:** send multipart/form-data for upload + add V1/V2 toggle ([8af628c](https://github.com/imagekit-developer/n8n-nodes-imagekit/commit/8af628c4005746cf5dec72f5b8898cbe7f803112))
+* **file:** use AITags body key for bulkRemoveAITags ([659b09f](https://github.com/imagekit-developer/n8n-nodes-imagekit/commit/659b09f967def90dbe2c408cc72cf2f426906cb7))
+
 ## [1.0.1](https://github.com/imagekit-developer/n8n-nodes-imagekit/compare/1.0.0...1.0.1) (2026-05-12)
 
 ## 1.0.0 (2026-05-12)
