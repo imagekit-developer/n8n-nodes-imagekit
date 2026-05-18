@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.4](https://github.com/imagekit-developer/n8n-nodes-imagekit/compare/1.0.3...1.0.4) (2026-05-18)
+
+### Features
+
+* **file:** add publish/unpublish operation ([634e63a](https://github.com/imagekit-developer/n8n-nodes-imagekit/commit/634e63af3285ea65d0763c53d437e4ad2e7e2562))
+
 ## [1.0.3](https://github.com/imagekit-developer/n8n-nodes-imagekit/compare/1.0.1...1.0.3) (2026-05-14)
 
 ### Features
