@@ -10,6 +10,7 @@ import {
 } from '../_generated/file';
 import { fileUploadDescription, uploadFile } from './upload';
 import { fileUpdateDescription, updateFile } from './update';
+import { filePublishDescription, publishFile } from './publish';
 
 const showOnlyForFile = {
 	resource: ['file'],
@@ -78,6 +79,12 @@ export const fileDescription: INodeProperties[] = [
 				description: 'Move a file to another location',
 			},
 			{
+				name: 'Publish / Unpublish',
+				value: 'publish',
+				action: 'Publish or unpublish a file',
+				description: 'Change the publication status of a file and its versions',
+			},
+			{
 				name: 'Rename',
 				value: 'rename',
 				action: 'Rename a file',
@@ -101,6 +108,7 @@ export const fileDescription: INodeProperties[] = [
 	...generatedFieldsOnly,
 	...fileUploadDescription,
 	...fileUpdateDescription,
+	...filePublishDescription,
 ];
 
 export async function executeFile(
@@ -110,5 +118,6 @@ export async function executeFile(
 	const operation = this.getNodeParameter('operation', i) as string;
 	if (operation === 'upload') return uploadFile.call(this, i);
 	if (operation === 'update') return updateFile.call(this, i);
+	if (operation === 'publish') return publishFile.call(this, i);
 	return executeGeneratedFile.call(this, i);
 }

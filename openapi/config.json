@@ -69,6 +69,7 @@
     "upload-file",
     "upload-file-v2",
     "update-file-details",
+    "publish-file",
     "list-and-search-assets"
   ],
   "operations": {
