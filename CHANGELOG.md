@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.5](https://github.com/imagekit-developer/n8n-nodes-imagekit/compare/1.0.4...1.0.5) (2026-05-19)
+
+### Features
+
+* **workflows:** add three sample workflow templates ([e452cfd](https://github.com/imagekit-developer/n8n-nodes-imagekit/commit/e452cfdb120573b9accdd751cb24b2745ec02175))
+
+### Bug Fixes
+
+* **trigger:** add webhookMethods stubs and update display names to ImageKit ([8675b9e](https://github.com/imagekit-developer/n8n-nodes-imagekit/commit/8675b9e02a153cbeabda537c3dcaf35f95c49ce3))
+
 ## [1.0.4](https://github.com/imagekit-developer/n8n-nodes-imagekit/compare/1.0.3...1.0.4) (2026-05-18)
 
 ### Features
