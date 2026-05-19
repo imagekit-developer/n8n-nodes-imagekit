@@ -3,6 +3,7 @@ import type {
 	ICredentialsDecrypted,
 	ICredentialTestFunctions,
 	IDataObject,
+	IHookFunctions,
 	INodeCredentialTestResult,
 	INodeType,
 	INodeTypeDescription,
@@ -19,7 +20,7 @@ import { verifyImagekitSignature } from './verifySignature';
  *  See https://imagekit.io/docs/webhooks for payload structure. */
 export class ImagekitTrigger implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Imagekit Trigger',
+		displayName: 'ImageKit Trigger',
 		name: 'imagekitTrigger',
 		icon: { light: 'file:imagekit.light.svg', dark: 'file:imagekit.dark.svg' },
 		group: ['trigger'],
@@ -28,7 +29,7 @@ export class ImagekitTrigger implements INodeType {
 		description:
 			'Triggers on ImageKit webhook events (file lifecycle, transformations, video processing).',
 		eventTriggerDescription: 'Waiting for an ImageKit webhook delivery',
-		defaults: { name: 'Imagekit Trigger' },
+		defaults: { name: 'ImageKit Trigger' },
 		// Surfaces the trigger as an AI tool so agents can subscribe to ImageKit
 		// webhook events programmatically (matches the n8n strict-lint default).
 		usableAsTool: true,
@@ -153,6 +154,31 @@ export class ImagekitTrigger implements INodeType {
 					'Maximum allowed difference between the timestamp in the x-ik-signature header and the current time. Helps mitigate replay attacks.',
 			},
 		],
+	};
+
+	webhookMethods = {
+		default: {
+			async checkExists(this: IHookFunctions): Promise<boolean> {
+				// ImageKit has no programmatic webhook registration API.
+				// The URL must be configured manually in the ImageKit dashboard.
+				return false;
+			},
+			async create(this: IHookFunctions): Promise<boolean> {
+				// No API to call — the user copies the webhook URL shown in n8n
+				// and pastes it into the ImageKit dashboard under Settings > Webhooks.
+				// Surface a hint in the execution log so the requirement is discoverable
+				// at activation time, not just buried in the README.
+				const webhookUrl = this.getNodeWebhookUrl('default');
+				this.logger.info(
+					`[ImagekitTrigger] No public webhook registration API. Add this URL in the ImageKit dashboard (Settings > Webhooks): ${webhookUrl}`,
+				);
+				return true;
+			},
+			async delete(this: IHookFunctions): Promise<boolean> {
+				// No API to call — the user removes the URL from the ImageKit dashboard manually.
+				return true;
+			},
+		},
 	};
 
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {

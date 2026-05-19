@@ -3,8 +3,9 @@ import type {
 	INodeTypeDescription,
 	INodeExecutionData,
 	IExecuteFunctions,
+	JsonObject,
 } from 'n8n-workflow';
-import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
+import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { assetDescription, executeAsset } from './resources/asset';
 import { fileDescription, executeFile } from './resources/file';
 // Resources below are produced by scripts/generate.ts from
@@ -23,26 +24,20 @@ import { savedExtensionDescription, executeSavedExtension } from './resources/_g
 
 export class Imagekit implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Imagekit',
+		displayName: 'ImageKit',
 		name: 'imagekit',
 		icon: { light: 'file:imagekit.light.svg', dark: 'file:imagekit.dark.svg' },
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-		description: 'Interact with the Imagekit API',
+		description: 'Interact with the ImageKit API',
 		defaults: {
-			name: 'Imagekit',
+			name: 'ImageKit',
 		},
 		usableAsTool: true,
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],
 		credentials: [{ name: 'imagekitApi', required: true }],
-		requestDefaults: {
-			baseURL: 'https://api.imagekit.io',
-			headers: {
-				Accept: 'application/json',
-			},
-		},
 		properties: [
 			{
 				displayName: 'Resource',
@@ -186,7 +181,7 @@ export class Imagekit implements INodeType {
 					returnData.push({ json: { error: (error as Error).message }, pairedItem: { item: i } });
 					continue;
 				}
-				throw error;
+				throw new NodeApiError(this.getNode(), error as JsonObject);
 			}
 		}
 
