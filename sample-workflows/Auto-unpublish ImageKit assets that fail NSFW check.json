@@ -1,0 +1,290 @@
+{
+  "name": "Auto-unpublish ImageKit assets that fail NSFW check",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🔞 Auto-unpublish ImageKit Assets That Fail NSFW Check\n\n**Who is this for?**\nTeams that allow user-generated or third-party image uploads to ImageKit and need an automated safety layer to prevent inappropriate content from going live.\n\n**What it does**\nWhen a new file is uploaded to ImageKit, this workflow automatically downloads it, runs it through an AI vision model for NSFW detection, and unpublishes it if flagged — before it can be served via CDN.\n\n**How it works**\n1. ImageKit fires a webhook on `file.created`\n2. The image is downloaded as binary via HTTP\n3. GPT-4o Vision analyzes the image and returns a structured JSON verdict\n4. If `is_nsfw` is `true`, the file is immediately unpublished in ImageKit\n5. Clean images pass through without any action\n\n**Setup checklist**\n- [ ] Add **ImageKit** webhook credentials in *New File Upload* node\n- [ ] Add **ImageKit** API credentials in *Unpublish File* node\n- [ ] Add **OpenRouter** credentials with access to `openai/gpt-4o` in *GPT-4o Vision* node\n- [ ] In ImageKit dashboard, ensure new uploads default to **published** so this workflow acts as the gatekeeper",
+        "height": 660,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -80
+      ],
+      "id": "81ecd665-4e9a-4a33-9c31-5f3cc069fb68",
+      "name": "Overview"
+    },
+    {
+      "parameters": {
+        "content": "### 1️⃣ Trigger & Download\nImageKit fires a `file.created` event on every new upload. The image is immediately downloaded as binary so it can be passed to the vision model.",
+        "height": 348,
+        "width": 408,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        496,
+        -80
+      ],
+      "id": "89b5b817-2709-44a9-87a4-357ad921fd55",
+      "name": "Section 1"
+    },
+    {
+      "parameters": {
+        "content": "### 2️⃣ AI Vision Analysis\nGPT-4o receives the binary image via **Automatically Passthrough Binary Images** and returns a structured JSON verdict with `is_nsfw`, `confidence`, and `reason`.",
+        "height": 524,
+        "width": 380,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        928,
+        -80
+      ],
+      "id": "b1dfcd8f-e0fd-4c5d-9ce9-cf8a02ae831f",
+      "name": "Section 2"
+    },
+    {
+      "parameters": {
+        "content": "### 3️⃣ Decision & Action\nIf `is_nsfw` is `true`, the file is unpublished in ImageKit immediately. If clean, the workflow exits without any action.",
+        "height": 364,
+        "width": 360,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        -80
+      ],
+      "id": "7997b488-a5f0-4414-b2ae-6150167bf133",
+      "name": "Section 3"
+    },
+    {
+      "parameters": {
+        "content": "ℹ️ **Confidence threshold**\nCurrently flags any image where `is_nsfw` is `true` regardless of confidence score. To reduce false positives, add a second condition in the IF node:\n`confidence >= 0.85`",
+        "height": 140,
+        "width": 356
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        304
+      ],
+      "id": "a56bbaac-d36c-4e75-aad8-c90ff28bcd84",
+      "name": "Confidence Threshold Note"
+    },
+    {
+      "parameters": {
+        "events": [
+          "file.created"
+        ]
+      },
+      "type": "@imagekit/n8n-nodes-imagekit.imagekitTrigger",
+      "typeVersion": 1,
+      "position": [
+        544,
+        80
+      ],
+      "id": "28089e15-9332-4d8d-8513-950e84487fee",
+      "name": "New File Upload",
+      "webhookId": "5a3215ae-66cb-4c90-9be6-7fe436256842",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.data.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        768,
+        80
+      ],
+      "id": "b4ecf825-db34-4c21-a653-d81cf2887a42",
+      "name": "Download Image"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a content moderation system. Analyze this image and respond with JSON only:\n\n{\n  \"is_nsfw\": true | false,\n  \"confidence\": 0.0 - 1.0,\n  \"reason\": \"one sentence explanation or null\"\n}\n\nFlag as nsfw if the image contains nudity, sexual content, graphic violence, or gore.\nDo not flag artistic nudity in classical paintings or medical imagery.\n",
+        "hasOutputParser": true,
+        "options": {
+          "passthroughBinaryImages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        992,
+        80
+      ],
+      "id": "d2649fab-a3c9-48fe-b57e-c5bce11041bc",
+      "name": "GPT-4o Vision"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        304
+      ],
+      "id": "6117625b-2c23-45ef-909f-0af8fbfb50bf",
+      "name": "OpenRouter Chat Model",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"is_nsfw\": true,\n  \"confidence\": 0.0,\n  \"reason\": \"one sentence explanation or null\"\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1136,
+        304
+      ],
+      "id": "0cd0169f-3f93-445e-8a28-7ed01dc362f3",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6cae5400-52a1-4390-bd8f-433875dc19ed",
+              "leftValue": "={{ $json.output.is_nsfw }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1344,
+        80
+      ],
+      "id": "20e8dc2e-9c0b-4d54-9524-4d9dc7477844",
+      "name": "Is NSFW?"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "publish",
+        "fileId": "={{ $('New File Upload').item.json.data.fileId }}",
+        "isPublished": false
+      },
+      "type": "@imagekit/n8n-nodes-imagekit.imagekit",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        16
+      ],
+      "id": "d70fd671-9534-4c06-abae-e2f2cada09d6",
+      "name": "Unpublish File",
+      "credentials": {}
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "New File Upload": {
+      "main": [
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "GPT-4o Vision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "GPT-4o Vision",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "GPT-4o Vision",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4o Vision": {
+      "main": [
+        [
+          {
+            "node": "Is NSFW?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is NSFW?": {
+      "main": [
+        [
+          {
+            "node": "Unpublish File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "589b9eee-7512-45d4-9c3a-edb6cf5a82b0",
+  "meta": {
+    "instanceId": "0f3cb1a79c7caaa2656d94370f109782801f2c44791ee9942c9dd9f29f55cb82"
+  },
+  "id": "O0oQNpVv6RYoK3w6OUFHN",
+  "tags": []
+}

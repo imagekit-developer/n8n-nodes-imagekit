@@ -1,0 +1,186 @@
+{
+  "name": "Alert Slack when ImageKit storage or bandwidth usage exceeds threshold",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## ⚠️ Alert Slack when ImageKit Usage Exceeds Threshold\n\n**Who is this for?**\nTeams on a fixed ImageKit plan who want to be proactively notified before hitting usage limits — avoiding unexpected overages or service interruptions.\n\n**What it does**\nRuns every hour, fetches current ImageKit usage stats for the billing month, and sends a Slack alert if any metric exceeds its configured threshold. Includes a visual progress bar per metric.\n\n**How it works**\n1. Schedule Trigger fires every hour\n2. ImageKit API returns usage stats for the current billing month\n3. Each metric is checked against its threshold\n4. If any breach is found, a consolidated Slack message is sent with progress bars\n5. If nothing is breached, the workflow exits silently\n\n**Default thresholds**\n- Storage: 30 GB\n- Bandwidth: 30 GB\n- Video Processing Units: 5,000\n- AI Extension Units: 5,000\n- Original Cache Storage: 1,000\n\nTo adjust, update the `thresholds` object in the *Check Thresholds* node.\n\n**Setup checklist**\n- [ ] Add **ImageKit** API credentials in *Get Account Usage* node\n- [ ] Add **Slack** credentials and set your alert channel in *Send Slack Alert* node\n- [ ] Update threshold values in *Check Thresholds* to match your plan limits",
+        "height": 640,
+        "width": 1140
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        752,
+        -464
+      ],
+      "id": "68aa53f0-43cb-415e-b251-2aece61e5625",
+      "name": "Overview"
+    },
+    {
+      "parameters": {
+        "content": "### 1️⃣ Trigger & Fetch\nFires every hour and fetches ImageKit usage stats for the current billing month using the account API.",
+        "height": 308,
+        "width": 408,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        752,
+        208
+      ],
+      "id": "1d35bf38-e213-4840-8606-0901fcfd793a",
+      "name": "Section 1"
+    },
+    {
+      "parameters": {
+        "content": "### 2️⃣ Check Thresholds\nEach metric is compared against its threshold. Breaching metrics are collected into a `breaches` array with a progress bar. Returns no items if nothing is breached — stopping the workflow silently.",
+        "height": 308,
+        "width": 376,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        208
+      ],
+      "id": "455fa7fd-e44e-4f87-a573-7f62314bdc8d",
+      "name": "Section 2"
+    },
+    {
+      "parameters": {
+        "content": "### 3️⃣ Notify\nSends a single consolidated Slack message listing all breached metrics with current value, threshold, and a visual progress bar showing how far over the limit each metric is.",
+        "height": 308,
+        "width": 320,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1584,
+        208
+      ],
+      "id": "e55a2fcb-b80d-4633-8b1d-417ad657ae73",
+      "name": "Section 3"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        800,
+        352
+      ],
+      "id": "6619da90-2f74-47ae-8f81-0e5ba95f10c0",
+      "name": "Every Hour"
+    },
+    {
+      "parameters": {
+        "resource": "account",
+        "startDate": "={{ $now.startOf('month').toFormat('yyyy-MM-dd') }}",
+        "endDate": "={{ $now.toFormat('yyyy-MM-dd') }}"
+      },
+      "type": "@imagekit/n8n-nodes-imagekit.imagekit",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        352
+      ],
+      "id": "0d8c1180-6108-4387-b32d-04a01867bb4e",
+      "name": "Get Account Usage",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "jsCode": "const usage = $input.first().json;\nconst ONE_GB = 1024 * 1024 * 1024;\n\nconst thresholds = {\n  storage: 30 * ONE_GB,\n  bandwidth: 30 * ONE_GB,\n  videoUnits: 1,\n  aiUnits: 1,\n  originalCache: 1\n};\n\nfunction progressBar(value, max, blocks = 20) {\n  const pct = value / max;\n  const filled = Math.min(Math.round(pct * blocks), blocks);\n  const empty = blocks - filled;\n  return '`' + '█'.repeat(filled) + '▒'.repeat(empty) + '`' + ` ${(pct * 100).toFixed(1)}%`;\n}\n\nconst checks = [\n  { metric: 'Storage',                value: usage.mediaLibraryStorageBytes,  max: thresholds.storage,       display: (v) => (v / ONE_GB).toFixed(2) + ' GB', threshold: '30 GB' },\n  { metric: 'Bandwidth',              value: usage.bandwidthBytes,             max: thresholds.bandwidth,     display: (v) => (v / ONE_GB).toFixed(2) + ' GB', threshold: '30 GB' },\n  { metric: 'Video Units',            value: usage.videoProcessingUnitsCount,  max: thresholds.videoUnits,    display: (v) => v,                               threshold: '5000'  },\n  { metric: 'Extension Units',        value: usage.extensionUnitsCount,        max: thresholds.aiUnits,       display: (v) => v,                               threshold: '5000'  },\n  { metric: 'Original Cache Storage', value: usage.originalCacheStorageBytes,  max: thresholds.originalCache, display: (v) => v,                               threshold: '1000'  },\n];\n\nconst breaches = checks\n  .filter(c => c.value >= c.max)\n  .map(c => ({\n    metric: c.metric,\n    value: c.display(c.value),\n    threshold: c.threshold,\n    bar: progressBar(c.value, c.max)\n  }));\n\nif (breaches.length === 0) return [];\n\nreturn [{ json: { breaches } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        352
+      ],
+      "id": "3cb8c13c-08bf-44c6-bd74-2107b91ebc16",
+      "name": "Check Thresholds"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#n8n-test",
+          "mode": "name"
+        },
+        "messageType": "block",
+        "blocksUi": "={\n  \"blocks\": [\n    {\n      \"type\": \"header\",\n      \"text\": {\n        \"type\": \"plain_text\",\n        \"text\": \"⚠️ ImageKit Usage Alert\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"The following usage thresholds have been exceeded:\"\n      }\n    },\n    {\n  \"type\": \"section\",\n  \"text\": {\n    \"type\": \"mrkdwn\",\n    \"text\": \"={{ $json.breaches.map(b => `*${b.metric}*: ${b.value} / ${b.threshold}\\\\n${b.bar}`).join('\\\\n\\\\n') }}\"\n  }\n},\n    {\n      \"type\": \"context\",\n      \"elements\": [\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"Checked at {{ $now.toISO() }}\"\n        }\n      ]\n    }\n  ]\n}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1696,
+        352
+      ],
+      "id": "fcdea5b7-b230-420a-9fd3-37cfa62a1667",
+      "name": "Send Slack Alert",
+      "webhookId": "71257768-b5a4-4592-bb6c-9efdc3171c86",
+      "credentials": {}
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every Hour": {
+      "main": [
+        [
+          {
+            "node": "Get Account Usage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Account Usage": {
+      "main": [
+        [
+          {
+            "node": "Check Thresholds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Thresholds": {
+      "main": [
+        [
+          {
+            "node": "Send Slack Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "39d731da-4fef-4757-bacb-a7d8e3d8b57c",
+  "meta": {
+    "instanceId": "0f3cb1a79c7caaa2656d94370f109782801f2c44791ee9942c9dd9f29f55cb82"
+  },
+  "id": "sAtjy3vD2xYU28frppQej",
+  "tags": []
+}

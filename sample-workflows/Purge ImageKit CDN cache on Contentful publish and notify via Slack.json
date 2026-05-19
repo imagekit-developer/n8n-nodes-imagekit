@@ -1,0 +1,388 @@
+{
+  "name": "Purge ImageKit CDN cache on Contentful publish and notify via Slack",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🔄 Purge ImageKit CDN Cache on Contentful Publish\n\n**Who is this for?**\nTeams using ImageKit assets being delivered over Contentful assets who need stale CDN cache cleared automatically whenever content is republished.\n\n**What it does**\nWhen an asset is published in Contentful, this workflow purges the ImageKit CDN cache for all affected URLs and posts real-time status updates to Slack — one message per URL, updated to ✅ when complete.\n\n**How it works**\n1. Contentful sends a webhook on `Asset → Publish`\n2. The payload is scanned recursively for all `ik.imagekit.io` URLs\n3. A cache purge request is fired per URL via the ImageKit API\n4. A Slack message is sent per URL showing the Request ID and in-progress status\n5. The workflow polls ImageKit until each purge is confirmed complete\n6. Each Slack message is updated to ✅ Completed\n\n**Setup checklist**\n- [ ] Add **ImageKit** credentials (API key + URL endpoint)\n- [ ] Add **Slack** credentials and set your target channel in the *Send Purge Status to Slack* node\n- [ ] In Contentful → Settings → Webhooks, create a webhook for `Asset → Publish` pointing to the URL in *Contentful Webhook Handler*\n- [ ] Ensure Contentful assets are delivered via ImageKit proxy — see [ImageKit × Contentful docs](https://imagekit.io/docs/integration/contentful)",
+        "height": 728,
+        "width": 500
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2080,
+        32
+      ],
+      "id": "2fade013-912e-47b8-8fe9-bdeb9b9a14cc",
+      "name": "Overview"
+    },
+    {
+      "parameters": {
+        "content": "### 1️⃣ Trigger & Extract\nContentful fires a webhook on `Asset.publish`. The payload is parsed and scanned recursively to find all ImageKit proxy URLs embedded anywhere in the response.",
+        "height": 340,
+        "width": 428,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1568,
+        176
+      ],
+      "id": "4c3bb0d0-092c-4a29-ad72-b7e0e7d5bd2f",
+      "name": "Section 1"
+    },
+    {
+      "parameters": {
+        "content": "### 2️⃣ Purge & Notify\nEach URL is purged individually via the ImageKit API. The returned `requestId` is paired back with its URL, then a Slack message is sent per URL with in-progress status.",
+        "height": 340,
+        "width": 628,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1120,
+        176
+      ],
+      "id": "f12baff8-45dd-49ec-80bd-989558014fd7",
+      "name": "Section 2"
+    },
+    {
+      "parameters": {
+        "content": "### 3️⃣ Poll & Complete\nThe workflow polls ImageKit every 5s until the purge status is no longer `Pending`. Once complete, the corresponding Slack message is updated to ✅ Completed.",
+        "height": 530,
+        "width": 884,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        112
+      ],
+      "id": "1dde37bf-e593-42ba-b14b-d2bee9f2e0b0",
+      "name": "Section 3"
+    },
+    {
+      "parameters": {
+        "content": "**⚠️ Required: Fix Contentful Content-Type**\nIn Contentful → Settings → Webhooks → your webhook → **Custom headers**, add:\n```\nContent-Type: application/json\n```\nWithout this, n8n will receive the payload as a binary buffer and the workflow will fail.",
+        "height": 192,
+        "width": 420,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1568,
+        528
+      ],
+      "id": "ef8a25ef-52b2-4c7d-867f-c1b0e166e953",
+      "name": "Warning: Content-Type"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "67e07150-10d1-41b5-85d8-ee22956d8d3f",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1520,
+        320
+      ],
+      "id": "1c1a3623-fbde-42d6-bdb1-aa9ac84e8022",
+      "name": "Contentful Webhook Handler",
+      "webhookId": "67e07150-10d1-41b5-85d8-ee22956d8d3f"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\n\nfunction findIKUrls(obj, urls = new Set()) {\n  if (typeof obj === 'string') {\n    if (obj.includes('ik.imagekit.io')) {\n      const normalized = obj.split('?')[0].replace(/^\\/\\//, 'https://');\n      urls.add(normalized);\n    }\n  } else if (Array.isArray(obj)) {\n    obj.forEach(item => findIKUrls(item, urls));\n  } else if (obj && typeof obj === 'object') {\n    Object.values(obj).forEach(val => findIKUrls(val, urls));\n  }\n  return urls;\n}\n\nconst urls = [...findIKUrls(body)];\n\nreturn urls.map(url => ({ json: { url } }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1296,
+        320
+      ],
+      "id": "2cfd786c-219a-47d9-9118-d1c951e6cb39",
+      "name": "Extract ImageKit URLs"
+    },
+    {
+      "parameters": {
+        "resource": "purgeCache",
+        "url": "={{ $json.url }}"
+      },
+      "type": "@imagekit/n8n-nodes-imagekit.imagekit",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        320
+      ],
+      "id": "6be5ac7e-f469-4fe6-b752-30d16e4c4c10",
+      "name": "Purge ImageKit Cache",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "jsCode": "const urls = $('Extract ImageKit URLs').all();\n\nconst items = $input.all().map((item, index) => ({\n  url: urls.at(index).json.url,\n  requestId: item.json.requestId,\n  status: 'pending'\n}));\n\nreturn items.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -848,
+        320
+      ],
+      "id": "62738d5f-6a6e-4d8c-98ac-3187678bb24a",
+      "name": "Map URLs to Request IDs"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#n8n-test",
+          "mode": "name"
+        },
+        "messageType": "block",
+        "blocksUi": "={\n\t\"blocks\": [\n\t\t{\n\t\t\t\"type\": \"header\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"plain_text\",\n\t\t\t\t\"text\": \"🔄 CDN Cache Purge — In Progress\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"fields\": [\n\t\t\t\t{\n\t\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\t\"text\": \"*{{ $('Contentful Webhook Handler').item.json.body.sys.type }}*\\n{{ $('Contentful Webhook Handler').item.json.body.fields.title['en-US'] }}\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\t\"text\": \"*Published by*\\n{{ $('Contentful Webhook Handler').item.json.body.sys.createdBy.sys.id }}\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\t\"text\": \"*Space*\\n{{ $('Contentful Webhook Handler').item.json.body.sys.space.sys.id }}\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\t\"text\": \"*Request ID*\\n`{{ $json.requestId }}`\"\n\t\t\t\t}\n\t\t\t]\n\t\t},\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\"text\": \"*URL being purged*\\n`{{ $json.url }}`\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"divider\"\n\t\t},\n\t\t{\n\t\t\t\"type\": \"context\",\n\t\t\t\"elements\": [\n\t\t\t\t{\n\t\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\t\"text\": \"Triggered at {{ $now.toISO() }}\"\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t]\n}",
+        "text": "Purge Cache triggered",
+        "otherOptions": {
+          "unfurl_links": false,
+          "unfurl_media": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        -624,
+        320
+      ],
+      "id": "b88659df-f151-4fdb-a784-f5df82558305",
+      "name": "Send Purge Status to Slack",
+      "webhookId": "6e82fdbf-8f71-41f3-ae22-e07b25acbb55",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "resource": "purgeCache",
+        "operation": "getStatus",
+        "requestId": "={{ $('Map URLs to Request IDs').item.json.requestId }}"
+      },
+      "type": "@imagekit/n8n-nodes-imagekit.imagekit",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        320
+      ],
+      "id": "a09a2c77-d2bd-43b5-bd75-8f302128602a",
+      "name": "Check Purge Status",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bc9a57fd-60e6-474b-910c-b58bd5fbbe2a",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "Pending",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -176,
+        240
+      ],
+      "id": "9d16e7b9-07b3-486a-815d-81dc992d4405",
+      "name": "Is Purge Complete?"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  json: {\n    slack_message_timestamp: $('Send Purge Status to Slack').item.json.message_timestamp,\n    slack_channel: $('Send Purge Status to Slack').item.json.channel,\n    request_id: $('Purge ImageKit Cache').item.json.requestId,\n    url: $('Extract ImageKit URLs').item.json.url,\n    title: $('Contentful Webhook Handler').item.json.body.fields.title['en-US'],\n    createdBy: $('Contentful Webhook Handler').item.json.body.sys.createdBy.sys.id,\n    space: $('Contentful Webhook Handler').item.json.body.sys.space.sys.id\n  }\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        48,
+        192
+      ],
+      "id": "04806faa-f01d-4edc-85f5-3ef9d0ab451d",
+      "name": "Prepare Slack Update Data"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "channelId": {
+          "__rl": true,
+          "value": "={{ $json.slack_channel }}",
+          "mode": "id"
+        },
+        "ts": "={{ $json.slack_message_timestamp }}",
+        "messageType": "block",
+        "blocksUi": "={\n  \"blocks\": [\n    {\n      \"type\": \"header\",\n      \"text\": {\n        \"type\": \"plain_text\",\n        \"text\": \"✅ CDN Cache Purge — Completed\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"fields\": [\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"*{{ $('Contentful Webhook Handler').item.json.body.sys.type }}*\\n{{ $('Contentful Webhook Handler').item.json.body.fields.title['en-US'] }}\"\n        },\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"*Published by*\\n{{ $('Contentful Webhook Handler').item.json.body.sys.createdBy.sys.id }}\"\n        },\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"*Space*\\n{{ $('Contentful Webhook Handler').item.json.body.sys.space.sys.id }}\"\n        },\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"*Request ID*\\n`{{ $json.request_id }}`\"\n        }\n      ]\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Purged URL*\\n`{{ $json.url }}`\"\n      }\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"context\",\n      \"elements\": [\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"✓ Completed at {{ $now.toISO() }}\"\n        }\n      ]\n    }\n  ]\n}",
+        "updateFields": {},
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        272,
+        192
+      ],
+      "id": "a514b258-75cd-41ff-82c9-80adb28a7565",
+      "name": "Update Slack Message to Completed",
+      "webhookId": "2fe227ae-347c-4da9-a648-8b375a7420e7",
+      "credentials": {}
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        48,
+        416
+      ],
+      "id": "4b36323e-f791-4dd3-94ca-350a80883106",
+      "name": "Wait 5s Before Retry",
+      "webhookId": "2defe802-bc09-4a83-8bb3-7d07df65dfcf"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Contentful Webhook Handler": {
+      "main": [
+        [
+          {
+            "node": "Extract ImageKit URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract ImageKit URLs": {
+      "main": [
+        [
+          {
+            "node": "Purge ImageKit Cache",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Purge ImageKit Cache": {
+      "main": [
+        [
+          {
+            "node": "Map URLs to Request IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map URLs to Request IDs": {
+      "main": [
+        [
+          {
+            "node": "Send Purge Status to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Purge Status to Slack": {
+      "main": [
+        [
+          {
+            "node": "Check Purge Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Purge Status": {
+      "main": [
+        [
+          {
+            "node": "Is Purge Complete?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Purge Complete?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Slack Update Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 5s Before Retry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Slack Update Data": {
+      "main": [
+        [
+          {
+            "node": "Update Slack Message to Completed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5s Before Retry": {
+      "main": [
+        [
+          {
+            "node": "Check Purge Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "dba8880a-6699-46ab-8da6-307024868c91",
+  "meta": {
+    "instanceId": "0f3cb1a79c7caaa2656d94370f109782801f2c44791ee9942c9dd9f29f55cb82"
+  },
+  "id": "ZHR2qr__ZIBCTI-TY0CNy",
+  "tags": []
+}
