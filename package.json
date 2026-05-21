@@ -21,10 +21,8 @@
     "url": "https://imagekit.io"
   },
   "contributors": [
-    {
-      "name": "Abhinav Dhiman",
-      "email": "abhinav@imagekit.io"
-    }
+    "ImageKit Developer <developer@imagekit.io>",
+    "Abhinav Dhiman <abhinav@imagekit.io>"
   ],
   "repository": {
     "type": "git",
@@ -42,7 +40,7 @@
     "test:watch": "jest --watch",
     "generate": "tsx scripts/generate.ts",
     "generate:check": "tsx scripts/generate.ts && git diff --exit-code -- nodes/Imagekit/resources/_generated openapi/config.json",
-    "prepare": "husky"
+    "prepare-dev": "husky"
   },
   "files": [
     "dist"
