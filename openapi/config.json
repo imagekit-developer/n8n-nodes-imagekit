@@ -1,5 +1,5 @@
 {
-  "_comment": "Maps OpenAPI operationIds to n8n resources/operations. The generator reads this with vendor/sdk-generation/openapi/v1.0.0.yaml to produce nodes/Imagekit/resources/_generated/*.ts. Edit this file (not the generated TS) to change UI field names, descriptions, or operation grouping. Operations listed in `programmatic` are skipped by the generator and must be hand-written.",
+  "_comment": "Maps OpenAPI operationIds to n8n resources/operations. The generator reads this with openapi/openapi.yml to produce nodes/Imagekit/resources/_generated/*.ts. Edit this file (not the generated TS) to change UI field names, descriptions, or operation grouping. Operations listed in `programmatic` are skipped by the generator and must be hand-written.",
   "baseURL": "https://api.imagekit.io",
   "resources": {
     "account": {

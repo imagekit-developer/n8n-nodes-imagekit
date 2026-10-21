@@ -38,6 +38,7 @@
     "prepublishOnly": "n8n-node prerelease",
     "test": "jest",
     "test:watch": "jest --watch",
+    "fetch-spec": "scripts/fetch-spec.sh",
     "generate": "tsx scripts/generate.ts",
     "generate:check": "tsx scripts/generate.ts && git diff --exit-code -- nodes/Imagekit/resources/_generated openapi/config.json",
     "prepare-dev": "husky"

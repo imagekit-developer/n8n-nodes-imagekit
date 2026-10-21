@@ -1,17 +1,15 @@
 # Codegen for n8n-nodes-imagekit
 
 This directory holds the inputs to the resource codegen. The OpenAPI spec
-and Stainless SDK config live upstream; we mount them as a git submodule.
+and Stainless SDK config are vendored here from the private
+`imagekit-developer/imagekit-sdk-config` repo.
 
 ## Inputs
 
-- `../vendor/sdk-generation/openapi/v1.0.0.yaml` — the OpenAPI spec, sourced
-  via the [`imagekit-developer/sdk-generation`](https://github.com/imagekit-developer/sdk-generation)
-  submodule. Refresh with:
-  ```sh
-  git submodule update --remote vendor/sdk-generation
-  ```
-- `../vendor/sdk-generation/stainless-config/main.yaml` — ImageKit's Stainless
+- `openapi.yml` — the OpenAPI spec, sourced from
+  `imagekit-developer/imagekit-sdk-config` (private,
+  `default/stainless/openapi.yml` on `main`). Refresh with `npm run fetch-spec`.
+- `stainless.yml` — ImageKit's Stainless
   SDK config (resource grouping for their official SDKs). The generator reads
   it for cross-validation only — it warns when our `config.json` diverges from
   what Stainless ships, but never drives codegen directly. This is intentional:
@@ -27,8 +25,10 @@ and Stainless SDK config live upstream; we mount them as a git submodule.
 
 ```sh
 git clone <this-repo>
-git submodule update --init --recursive
 ```
+
+The spec files are committed; to refresh them run `npm run fetch-spec`
+(requires `gh` auth with access to the private repo).
 
 ## Generator
 
@@ -151,17 +151,17 @@ spec exposes but no trigger group surfaces.
   renames (Stainless drops an op) or additions (Stainless adds one).
 
 Wire `npm run generate:check` into CI to fail PRs that haven't regenerated
-after a submodule bump. The check covers `nodes/Imagekit/resources/_generated`,
+after a spec refresh. The check covers `nodes/Imagekit/resources/_generated`,
 `nodes/Imagekit/triggers/_generated`, and `openapi/config.json`.
 
 ## Refreshing upstream
 
-A scheduled GitHub Action (`.github/workflows/sync-openapi.yml`) bumps the
-submodule daily, regenerates, runs the test suite, and opens a PR if
-anything changed. To bump locally:
+A scheduled GitHub Action (`.github/workflows/sync-openapi.yml`) fetches the
+latest spec daily, regenerates, runs the test suite, and opens a PR if
+anything changed. To refresh locally:
 
 ```sh
-git submodule update --remote vendor/sdk-generation
+npm run fetch-spec
 npm run generate
 npm test
 ```

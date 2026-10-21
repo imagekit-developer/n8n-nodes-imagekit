@@ -9,7 +9,7 @@ import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workf
 import { assetDescription, executeAsset } from './resources/asset';
 import { fileDescription, executeFile } from './resources/file';
 // Resources below are produced by scripts/generate.ts from
-// vendor/sdk-generation + openapi/config.json. See openapi/README.md.
+// openapi/openapi.yml + openapi/config.json. See openapi/README.md.
 // `file` is partial codegen — its splicer at ./resources/file composes
 // the 9 generated ops with hand-written `upload` + `update`.
 import { customMetadataFieldsDescription, executeCustomMetadataFields } from './resources/_generated/customMetadataFields';

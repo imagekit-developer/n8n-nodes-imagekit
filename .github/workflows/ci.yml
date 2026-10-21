@@ -6,20 +6,61 @@ on:
     branches: 
       - main
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
+          # Check out the PR branch itself (not the merge ref) so regenerated
+          # output can be pushed back. Empty on `push`, which falls back to the default.
+          ref: ${{ github.head_ref }}
 
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
 
       - run: npm ci
+
+      - name: Regenerate resources
+        run: npm run generate 2>&1 | tee generate.log
+
+      - name: Report generator warnings
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          { echo '<!-- generator-warnings -->'
+            echo '### Generator warnings'
+            echo '```'
+            grep -E '^\[(warn|drift|stainless)\]|^  - ' generate.log || echo none
+            echo '```'; } > warnings.md
+          cat warnings.md >> "$GITHUB_STEP_SUMMARY"
+          [ -n "$PR" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ] || exit 0
+          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate -q '.[] | select(.body | contains("<!-- generator-warnings -->")) | .id' | head -n1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@warnings.md
+          else
+            gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -F body=@warnings.md
+          fi
+
+      # Same-repo PRs get the regenerated output committed back automatically.
+      # Fork PRs have a read-only token, so they fall through to generate:check below.
+      - name: Commit regenerated resources
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          if git diff --quiet -- nodes/Imagekit/resources/_generated; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add nodes/Imagekit/resources/_generated
+          git commit -m 'chore: regenerate resources from openapi/config.json'
+          git push
+
+      - run: npm run generate:check
       - run: npm run lint
       - run: npm test
       - run: npm run build
-      - run: npm run generate:check

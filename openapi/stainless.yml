@@ -1,0 +1,414 @@
+# yaml-language-server: $schema=https://app.stainless.com/config.schema.json
+
+organization:
+  # Name of your organization or company, used to determine the name of the client
+  # and headings.
+  name: ImageKit
+  # Link to your API documentation.
+  docs: https://imagekit.io/docs/api-reference
+  # Contact email for bug reports, questions, and support requests.
+  contact: developer@imagekit.io
+
+openapi:
+  code_samples: stainless
+
+# `targets` define the output targets and their customization options, such as
+# whether to emit the Node SDK and what it's package name should be.
+targets:
+  typescript:
+    package_name: "@imagekit/nodejs"
+    production_repo: imagekit-developer/imagekit-nodejs
+    publish:
+      npm:
+        auth_method: oidc
+      release:
+        branch: main
+        prerelease: false
+    staging_repo: imagekit-developer/imagekit-nodejs
+  python:
+    package_name: imagekitio
+    publish:
+      pypi: true
+      release:
+        branch: main
+        prerelease: false
+    production_repo: imagekit-developer/imagekit-python
+    project_name: imagekitio
+    staging_repo: imagekit-developer/imagekit-python
+  php:
+    package_name: ImageKit
+    composer_package_name: 'imagekit/imagekit'
+    production_repo: imagekit-developer/imagekit-php
+    skip: true
+    publish:
+      packagist: true
+      release:
+        branch: main
+        prerelease: false
+    staging_repo: imagekit-developer/imagekit-php
+  csharp:
+    package_name: Imagekit
+    publish:
+      nuget: false
+      release:
+        branch: main
+        prerelease: false
+    skip: true
+    # production_repo: imagekit-developer/imagekit-dotnet
+  go:
+    package_name: imagekit
+    # production_repo: imagekit-developer/imagekit-go
+    options:
+      enable_v2: true
+    production_repo: imagekit-developer/imagekit-go
+    publish:
+      release:
+        branch: main
+        prerelease: false
+    staging_repo: imagekit-developer/imagekit-go
+  java:
+    reverse_domain: io.imagekit
+    publish:
+      maven:
+        sonatype_platform: portal
+      release:
+        branch: main
+        prerelease: false
+    production_repo: imagekit-developer/imagekit-java
+    staging_repo: imagekit-developer/imagekit-java
+  ruby:
+    gem_name: imagekitio
+    # production_repo: imagekit-developer/imagekit-ruby
+    publish:
+      rubygems: true
+      release:
+        branch: main
+        prerelease: false
+    production_repo: imagekit-developer/imagekit-ruby
+    staging_repo: imagekit-developer/imagekit-ruby
+  openapi:
+    readme_title: ImageKit's OpenAPI Specification
+    organization: ImageKit
+    production_repo: imagekit-developer/openapi
+    staging_repo: imagekit-developer/openapi
+
+# `environments` are a map of the name of the environment (e.g. "sandbox",
+# "production") to the corresponding url to use.
+environments:
+  production: https://api.imagekit.io
+
+# `resources` define the structure and organization for your API, such as how
+# methods and models are grouped together and accessed. See the [configuration
+# guide] for more information.
+#
+# [configuration guide]: https://www.stainless.com/docs/guides/configure#resources
+resources:
+  $shared:
+    models:
+      Extensions:
+        openapi_uri: '#/components/schemas/Extensions'
+      ExtensionItem:
+        openapi_uri: '#/components/schemas/Extensions/items'
+        only: [ java, ruby ]
+      SavedExtension:
+        openapi_uri: '#/components/schemas/SavedExtension'
+      ExtensionConfig:
+        openapi_uri: '#/components/schemas/ExtensionConfig'
+      NamedTransformation:
+        openapi_uri: '#/components/schemas/NamedTransformation'
+      SrcOptions:
+        openapi_uri: '#/components/schemas/SrcOptions'
+      GetImageAttributesOptions:
+        openapi_uri: '#/components/schemas/GetImageAttributesOptions'
+      ResponsiveImageAttributes:
+        openapi_uri: '#/components/schemas/ResponsiveImageAttributes'
+      Transformation:
+        openapi_uri: '#/components/schemas/Transformation'
+      TransformationPosition:
+        openapi_uri: '#/components/schemas/TransformationPosition'
+      StreamingResolution:
+        openapi_uri: '#/components/schemas/StreamingResolution'
+      Overlay:
+        openapi_uri: '#/components/schemas/Overlay'
+      BaseOverlay:
+        openapi_uri: '#/components/schemas/BaseOverlay'
+      OverlayPosition:
+        openapi_uri: '#/components/schemas/OverlayPosition'
+      OverlayTiming:
+        openapi_uri: '#/components/schemas/OverlayTiming'
+      TextOverlay:
+        openapi_uri: '#/components/schemas/TextOverlay'
+      ImageOverlay:
+        openapi_uri: '#/components/schemas/ImageOverlay'
+      VideoOverlay:
+        openapi_uri: '#/components/schemas/VideoOverlay'
+      SubtitleOverlay:
+        openapi_uri: '#/components/schemas/SubtitleOverlay'
+      SolidColorOverlay:
+        openapi_uri: '#/components/schemas/SolidColorOverlay'
+      TextOverlayTransformation:
+        openapi_uri: '#/components/schemas/TextOverlayTransformation'
+      SubtitleOverlayTransformation:
+        openapi_uri: '#/components/schemas/SubtitleOverlayTransformation'
+      SolidColorOverlayTransformation:
+        openapi_uri: '#/components/schemas/SolidColorOverlayTransformation'
+      AITag:
+        openapi_uri: '#/components/schemas/AITag'
+        only: [ go, ruby, java ]
+      VersionInfo:
+        openapi_uri: '#/components/schemas/VersionInfo'
+        only: [ go, ruby, java ]
+      SelectedFieldsSchema:
+        openapi_uri: '#/components/schemas/SelectedFieldsSchema'
+        only: [ go, ruby, java ]
+      CustomMetadata:
+        openapi_uri: '#/components/schemas/CustomMetadata'
+        only: [ go, ruby, java ]
+      EmbeddedMetadata:
+        openapi_uri: '#/components/schemas/EmbeddedMetadata'
+        only: [ go, ruby, java ]
+
+  dummy:
+    only:
+      - go
+      - python
+    methods:
+      create: post /v1/dummy/test
+
+  customMetadataFields:
+    models:
+      CustomMetadataField: '#/components/schemas/CustomMetadataField'
+    methods:
+      create: post /v1/customMetadataFields
+      list: get /v1/customMetadataFields
+      update: patch /v1/customMetadataFields/{id}
+      delete: delete /v1/customMetadataFields/{id}
+
+  files:
+    models:
+      File: "#/components/schemas/FileDetails"
+      Folder: "#/components/schemas/FolderDetails"
+      Metadata: "#/components/schemas/Metadata"
+      UpdateFileRequest: "#/components/schemas/UpdateFileRequest"
+    methods:
+      upload: post /api/v1/files/upload
+      get: get /v1/files/{fileId}/details
+      update:
+        endpoint: patch /v1/files/{fileId}/details
+      delete: delete /v1/files/{fileId}
+      copy: post /v1/files/copy
+      move: post /v1/files/move
+      rename: put /v1/files/rename
+    subresources:
+      bulk:
+        methods:
+          delete: post /v1/files/batch/deleteByFileIds
+          addTags: post /v1/files/addTags
+          removeTags: post /v1/files/removeTags
+          removeAiTags: post /v1/files/removeAITags
+      versions:
+        methods:
+          list: get /v1/files/{fileId}/versions
+          get: get /v1/files/{fileId}/versions/{versionId}
+          delete: delete /v1/files/{fileId}/versions/{versionId}
+          restore: put /v1/files/{fileId}/versions/{versionId}/restore
+      metadata:
+        methods:
+          get: get /v1/files/{fileId}/metadata
+          getFromURL: get /v1/metadata
+
+  savedExtensions:
+    methods:
+      list: get /v1/saved-extensions
+      create: post /v1/saved-extensions
+      get: get /v1/saved-extensions/{id}
+      update: patch /v1/saved-extensions/{id}
+      delete: delete /v1/saved-extensions/{id}
+
+  namedTransformations:
+    methods:
+      list: get /v1/named-transformations
+      create: post /v1/named-transformations
+      get: get /v1/named-transformations/{id}
+      update: patch /v1/named-transformations/{id}
+      delete: delete /v1/named-transformations/{id}
+
+  assets:
+    methods:
+      list: get /v1/files
+
+  cache:
+    subresources:
+      invalidation:
+        methods:
+          create: post /v1/files/purge
+          get: get /v1/files/purge/{requestId}
+
+  folders:
+    methods:
+      create: post /v1/folder
+      delete: delete /v1/folder
+      copy: post /v1/bulkJobs/copyFolder
+      move: post /v1/bulkJobs/moveFolder
+      rename: post /v1/bulkJobs/renameFolder
+    subresources:
+      job:
+        methods:
+          get: get /v1/bulkJobs/{jobId}
+
+  accounts:
+    mcp: false
+    subresources:
+      usage:
+        methods:
+          get: get /v1/accounts/usage
+      usageAnalytics:
+        models:
+          UsageAnalyticsResponse: '#/components/schemas/UsageAnalyticsResponse'
+          RequestBandwidthEntry: '#/components/schemas/RequestBandwidthEntry'
+        methods:
+          get: get /v1/accounts/usage-analytics
+      origins:
+        terraform: true
+        models:
+          OriginRequest: '#/components/schemas/OriginRequest'
+          OriginResponse: '#/components/schemas/OriginResponse'
+        methods:
+          list: get /v1/accounts/origins
+          create:
+            endpoint: post /v1/accounts/origins
+          get: get /v1/accounts/origins/{id}
+          update:
+            endpoint: put /v1/accounts/origins/{id}
+          delete: delete /v1/accounts/origins/{id}
+      urlEndpoints:
+        terraform: true
+        models:
+          UrlEndpointRequest: '#/components/schemas/UrlEndpointRequest'
+          UrlEndpointResponse: '#/components/schemas/UrlEndpointResponse'
+        methods:
+          list: get /v1/accounts/url-endpoints
+          create: post /v1/accounts/url-endpoints
+          get: get /v1/accounts/url-endpoints/{id}
+          update: put /v1/accounts/url-endpoints/{id}
+          delete: delete /v1/accounts/url-endpoints/{id}
+      webhooks:
+        models:
+          Webhook: '#/components/schemas/Webhook'
+          WebhookEventType: '#/components/schemas/WebhookEventType'
+        methods:
+          list: get /v1/accounts/webhooks
+          create: post /v1/accounts/webhooks
+          get: get /v1/accounts/webhooks/{id}
+          update: patch /v1/accounts/webhooks/{id}
+          delete: delete /v1/accounts/webhooks/{id}
+
+  beta:
+    subresources:
+      v2:
+        subresources:
+          files:
+            methods:
+              upload: post /api/v2/files/upload
+
+  webhooks:
+    models:
+      BaseWebhookEvent: '#/components/schemas/BaseWebhookEvent'
+      VideoTransformationAcceptedEvent: '#/components/schemas/VideoTransformationAcceptedEvent'
+      VideoTransformationReadyEvent: '#/components/schemas/VideoTransformationReadyEvent'
+      VideoTransformationErrorEvent: '#/components/schemas/VideoTransformationErrorEvent'
+      UploadPreTransformSuccessEvent: '#/components/schemas/UploadPreTransformSuccessEvent'
+      UploadPreTransformErrorEvent: '#/components/schemas/UploadPreTransformErrorEvent'
+      UploadPostTransformSuccessEvent: '#/components/schemas/UploadPostTransformSuccessEvent'
+      UploadPostTransformErrorEvent: '#/components/schemas/UploadPostTransformErrorEvent'
+      FileCreateEvent: '#/components/schemas/FileCreateEvent'
+      FileUpdateEvent: '#/components/schemas/FileUpdateEvent'
+      FileDeleteEvent: '#/components/schemas/FileDeleteEvent'
+      FileVersionCreateEvent: '#/components/schemas/FileVersionCreateEvent'
+      FileVersionDeleteEvent: '#/components/schemas/FileVersionDeleteEvent'
+      FolderCreateEvent: '#/components/schemas/FolderCreateEvent'
+      FolderUpdateEvent: '#/components/schemas/FolderUpdateEvent'
+      FolderDeleteEvent: '#/components/schemas/FolderDeleteEvent'
+
+    methods:
+      unwrap:
+        type: webhook_unwrap
+        discriminator: type
+        webhook_key_opt: webhook_secret
+
+      unsafe_unwrap:
+        type: webhook_unwrap
+        discriminator: type
+
+settings:
+  # All generated integration tests that hit the prism mock http server are marked
+  # as skipped. Removing this setting or setting it to false enables tests, but
+  # doing so may result in test failures due to bugs in the test server.
+  #
+  # [prism mock http server]: https://stoplight.io/open-source/prism
+  disable_mock_tests: true
+  license: Apache-2.0
+
+# `client_settings` define settings for the API client, such as extra constructor
+# arguments (used for authentication), retry behavior, idempotency, etc.
+client_settings:
+  opts:
+    private_key:
+      type: string
+      description: |
+        Your ImageKit private API key (starts with `private_`).
+        You can find this in the [ImageKit dashboard](https://imagekit.io/dashboard/developer/api-keys).
+      read_env: IMAGEKIT_PRIVATE_KEY # or let users pass it in code
+      nullable: false # required to create a client
+      auth: { security_scheme: basicAuth, role: 'username' }
+
+    password:
+      type: string
+      description: |
+        ImageKit uses your API key as username and ignores the password. 
+        The SDK sets a dummy value. You can ignore this field.
+      default: "do_not_set"
+      nullable: true
+      read_env: OPTIONAL_IMAGEKIT_IGNORES_THIS
+      auth: { security_scheme: basicAuth, role: 'password' }
+
+    webhook_secret:
+      type: string
+      description: |
+        Your ImageKit webhook secret for verifying webhook signatures (starts with `whsec_`).
+        You can find this in the [ImageKit dashboard](https://imagekit.io/dashboard/developer/webhooks).
+        Only required if you are using webhooks.
+      read_env: IMAGEKIT_WEBHOOK_SECRET
+      nullable: true
+
+# `readme` is used to configure the code snippets that will be rendered in the
+# README.md of various SDKs. In particular, you can change the `headline`
+# snippet's endpoint and the arguments to call it with.
+
+readme:
+  example_requests:
+    default:
+      type: request
+      endpoint: post /api/v1/files/upload
+      params:
+        file: https://www.example.com/public-url.jpg
+        fileName: file-name.jpg
+    headline:
+      type: request
+      endpoint: post /api/v1/files/upload
+      params:
+        file: https://www.example.com/public-url.jpg
+        fileName: file-name.jpg
+  include_stainless_attribution: false
+
+diagnostics:
+  ignored:
+    Pagination/NotConfigured:
+      - "#/pagination"
+    ReadmeExample/MissingParam:
+      - (resource) files > (method) upload
+    Model/Recommended: true
+    Model/IsConstant: true
+    Java/SchemaUnionDiscriminatorMissing:
+      - (resource) files > (method) update > (params) default > (param) update > (schema)
+    Ruby/NameShadowedBuiltin: true
