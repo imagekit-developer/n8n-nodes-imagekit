@@ -1,8 +1,3 @@
-// Splicer for the `file` resource: composes the 9 codegen'd ops in
-// `_generated/file` with the 2 hand-written ones (`upload`, `update`)
-// that involve binary-data handling and a complex `collection` UI which
-// the generator doesn't yet support. See `openapi/config.json` for the
-// full op list and `openapi/README.md` for the codegen rules.
 import type { IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
 import {
 	fileDescription as generatedFileDescription,
@@ -16,10 +11,7 @@ const showOnlyForFile = {
 	resource: ['file'],
 };
 
-// Drop the generated operation switcher (always at index 0) so we can
-// supply our own that also lists `upload` and `update`. The remaining
-// generated entries are per-op fields, each already gated by its own
-// `displayOptions.show.operation`, so they slot in unchanged.
+// Index 0 of the generated description is its operation switcher; ours replaces it.
 const generatedFieldsOnly = generatedFileDescription.slice(1);
 
 export const fileDescription: INodeProperties[] = [

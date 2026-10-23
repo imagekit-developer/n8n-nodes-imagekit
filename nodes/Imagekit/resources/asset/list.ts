@@ -181,7 +181,6 @@ export async function listAssets(
 		sort,
 	};
 
-	// Add optional parameters from additionalOptions if they have values
 	if (additionalOptions.path) {
 		qs.path = additionalOptions.path;
 	}
