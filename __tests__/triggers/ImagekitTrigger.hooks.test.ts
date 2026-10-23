@@ -9,10 +9,11 @@ describe('ImagekitTrigger webhookMethods', () => {
 	describe('checkExists', () => {
 		it('adopts a webhook whose endpoint matches the n8n URL', async () => {
 			const { context, staticData, http } = createMockHookFunctions({
+				nodeParameters: { events: ['file.created'] },
 				apiResponses: [
 					[
 						{ id: 'other', endpoint: 'https://x', secret: 's0', enabled: true },
-						{ id: 'wh_1', endpoint: URL, secret: 'whsec_1', enabled: true },
+						{ id: 'wh_1', endpoint: URL, secret: 'whsec_1', enabled: true, events: ['file.created'] },
 					],
 				],
 			});
@@ -50,6 +51,16 @@ describe('ImagekitTrigger webhookMethods', () => {
 			await expect(call).rejects.toBeInstanceOf(NodeOperationError);
 		});
 
+		it('turns a raw axios-style 403 into a NodeOperationError too', async () => {
+			const { context } = createMockHookFunctions({
+				apiResponses: [Object.assign(new Error('Forbidden'), { response: { status: 403 } })],
+			});
+
+			const call = hooks().checkExists.call(context);
+			await expect(call).rejects.toThrow(/Automatic Webhook Setup/);
+			await expect(call).rejects.toBeInstanceOf(NodeOperationError);
+		});
+
 		it('rethrows non-403 errors unchanged', async () => {
 			const { context } = createMockHookFunctions({
 				apiResponses: [Object.assign(new Error('boom'), { httpCode: '500' })],
@@ -60,7 +71,11 @@ describe('ImagekitTrigger webhookMethods', () => {
 
 		it('re-enables a disabled matching webhook', async () => {
 			const { context, staticData, http } = createMockHookFunctions({
-				apiResponses: [[{ id: 'wh_1', endpoint: URL, secret: 'whsec_1', enabled: false }], {}],
+				nodeParameters: { events: ['file.created'] },
+				apiResponses: [
+					[{ id: 'wh_1', endpoint: URL, secret: 'whsec_1', enabled: false, events: ['file.created'] }],
+					{},
+				],
 			});
 
 			const result = await hooks().checkExists.call(context);
@@ -74,9 +89,55 @@ describe('ImagekitTrigger webhookMethods', () => {
 				expect.objectContaining({
 					method: 'PATCH',
 					url: '/v1/accounts/webhooks/wh_1',
-					body: { enabled: true },
+					body: { enabled: true, events: ['file.created'] },
 				}),
 			);
+		});
+
+		it('PATCHes events when the adopted webhook has a different event set', async () => {
+			const { context, http } = createMockHookFunctions({
+				nodeParameters: { events: ['file.created', 'folder.deleted'] },
+				apiResponses: [
+					[{ id: 'wh_1', endpoint: URL, secret: 'whsec_1', enabled: true, events: ['file.deleted'] }],
+					{},
+				],
+			});
+
+			const result = await hooks().checkExists.call(context);
+
+			expect(result).toBe(true);
+			expect(http).toHaveBeenCalledTimes(2);
+			expect(http).toHaveBeenNthCalledWith(
+				2,
+				'imagekitApi',
+				expect.objectContaining({
+					method: 'PATCH',
+					url: '/v1/accounts/webhooks/wh_1',
+					body: { enabled: true, events: ['file.created', 'folder.deleted'] },
+				}),
+			);
+		});
+
+		it('does not PATCH when events match in a different order', async () => {
+			const { context, http } = createMockHookFunctions({
+				nodeParameters: { events: ['file.created', 'folder.deleted'] },
+				apiResponses: [
+					[
+						{
+							id: 'wh_1',
+							endpoint: URL,
+							secret: 'whsec_1',
+							enabled: true,
+							events: ['folder.deleted', 'file.created'],
+						},
+					],
+				],
+			});
+
+			const result = await hooks().checkExists.call(context);
+
+			expect(result).toBe(true);
+			expect(http).toHaveBeenCalledTimes(1);
 		});
 	});
 

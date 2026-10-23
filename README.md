@@ -65,11 +65,11 @@ To use this node, create ImageKit API credentials in n8n.
 
 The **ImageKit Trigger** node has an **Automatic Webhook Setup** toggle, which is on by default for new triggers.
 
-With the toggle on, the node only needs the **ImageKit API** credential. When you activate the workflow, the node creates the webhook in ImageKit, and when you deactivate it, the node deletes the webhook. The API key must have webhook access. Standard keys do not, so use a [restricted API key](https://imagekit.io/docs/api-keys) with webhook access. If activation fails with HTTP 403, the key does not have this access: use a restricted key, or turn the toggle off. If you change the **Events** parameter, deactivate and reactivate the workflow so the webhook is recreated with the new events.
+With the toggle on, the node only needs the **ImageKit API** credential. When you activate the workflow, the node creates the webhook in ImageKit, and when you deactivate it, the node deletes the webhook. The API key must have webhook access. Standard keys do not, so use a [restricted API key](https://imagekit.io/docs/api-keys) with webhook access. If activation fails with HTTP 403, the key does not have this access: use a restricted key, or turn the toggle off. On activation the node adopts any existing webhook that points at the trigger URL, updates its events to match the **Events** parameter, and re-enables it if it was disabled in the dashboard. In automatic mode the webhook signing secret is kept in the workflow's static data, which n8n stores unencrypted in its database (unlike credentials).
 
 With the toggle off, the node does not create or delete anything in ImageKit. Create the webhook yourself in the ImageKit dashboard, using the URL shown on the trigger node. The node then shows the **ImageKit Webhook API** credential. Paste the signing secret of your webhook into it so the node can verify signatures.
 
-Triggers created with versions before 2.0 have the toggle off and continue to work as before. To switch them to automatic setup, turn the toggle on and attach an **ImageKit API** credential.
+Triggers created with node version 1 (typeVersion 1) have the toggle off and continue to work as before. To switch them to automatic setup, turn the toggle on and attach an **ImageKit API** credential.
 
 **Security note:** Your ImageKit private key can perform privileged account operations. Store it only in n8n credentials and never expose it in workflow data, logs, frontend code, or shared screenshots.
 
