@@ -261,8 +261,23 @@ export class ImagekitTrigger implements INodeType {
 		const eventType = (body.type as string | undefined) ?? '';
 
 		if (verify) {
-			const credentials = await this.getCredentials('imagekitWebhookApi');
-			const secret = (credentials?.secret as string | undefined) ?? '';
+			// Secret resolution: the auto-registered webhook's secret lives in
+			// static data; the optional ImagekitWebhookApi credential is the
+			// fallback for manually-registered setups. getCredentials throws
+			// when the optional credential isn't set, so swallow that.
+			const staticData = this.getWorkflowStaticData('node');
+			let secret = staticData.secret as string | undefined;
+			if (!secret) {
+				const credentials = await this.getCredentials('imagekitWebhookApi').catch(
+					() => undefined,
+				);
+				secret = credentials?.secret as string | undefined;
+			}
+			if (!secret) {
+				const res = this.getResponseObject();
+				res.status(401).json({ error: 'invalid-signature', reason: 'no-secret' });
+				return { noWebhookResponse: true };
+			}
 			// n8n's express layer preserves the raw text on req.rawBody; we need
 			// it because re-stringifying the parsed body would change byte
 			// ordering and break the HMAC.

@@ -5,7 +5,8 @@ interface MockWebhookFunctionsOptions {
 	headers?: Record<string, string | string[]>;
 	body?: IDataObject;
 	rawBody?: Buffer | string;
-	credentials?: IDataObject;
+	credentials?: IDataObject | Error;
+	staticData?: IDataObject;
 }
 
 interface MockWebhookContext {
@@ -30,6 +31,7 @@ export function createMockWebhookFunctions(
 		body = {},
 		rawBody,
 		credentials,
+		staticData = {},
 	} = options;
 
 	const response: MockWebhookContext['response'] = {
@@ -71,7 +73,11 @@ export function createMockWebhookFunctions(
 		getBodyData: jest.fn(() => body),
 		getRequestObject: jest.fn(() => ({ rawBody })),
 		getResponseObject: jest.fn(() => response),
-		getCredentials: jest.fn(async () => credentials ?? {}),
+		getCredentials: jest.fn(async () => {
+			if (credentials instanceof Error) throw credentials;
+			return credentials ?? {};
+		}),
+		getWorkflowStaticData: jest.fn(() => staticData),
 		getNode: jest.fn(() => ({ name: 'ImageKit Trigger' })),
 		helpers: {
 			returnJsonArray: jest.fn((items: IDataObject[]) => items.map((item) => ({ json: item }))),
