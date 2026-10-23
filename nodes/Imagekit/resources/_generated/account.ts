@@ -18,6 +18,11 @@ const showOnlyForAccountGetUsage = {
 	resource: ['account'],
 };
 
+const showOnlyForAccountGetUsageAnalytics = {
+	operation: ['getUsageAnalytics'],
+	resource: ['account'],
+};
+
 export const accountDescription: INodeProperties[] = [
 	{
 		displayName: 'Operation',
@@ -31,6 +36,13 @@ export const accountDescription: INodeProperties[] = [
 				value: 'getUsage',
 				action: 'Get account usage',
 				description: 'Get account usage statistics',
+			},
+			{
+				name: 'Get Usage Analytics',
+				value: 'getUsageAnalytics',
+				action: 'Get account usage analytics',
+				description:
+					'Get account analytics (requests, bandwidth, status codes, cache, extensions, video processing) between two dates (beta)',
 			},
 		],
 		default: 'getUsage',
@@ -56,6 +68,29 @@ export const accountDescription: INodeProperties[] = [
 		description: 'End date for the usage period (format: YYYY-MM-DD)',
 		displayOptions: { show: showOnlyForAccountGetUsage },
 	},
+	// Get Usage Analytics
+	{
+		displayName: 'Start Date',
+		name: 'startDate',
+		type: 'string',
+		required: true,
+		default: '',
+		placeholder: 'YYYY-MM-DD',
+		description:
+			'Start date for the analytics period (format: YYYY-MM-DD, UTC). Range must be less than 90 days.',
+		displayOptions: { show: showOnlyForAccountGetUsageAnalytics },
+	},
+	{
+		displayName: 'End Date',
+		name: 'endDate',
+		type: 'string',
+		required: true,
+		default: '',
+		placeholder: 'YYYY-MM-DD',
+		description:
+			'End date for the analytics period (format: YYYY-MM-DD, UTC). Range must be less than 90 days.',
+		displayOptions: { show: showOnlyForAccountGetUsageAnalytics },
+	},
 ];
 
 export async function executeAccount(
@@ -74,6 +109,25 @@ export async function executeAccount(
 				method: 'GET',
 				baseURL: 'https://api.imagekit.io',
 				url: '/v1/accounts/usage',
+				qs: { startDate, endDate },
+			};
+			const responseData = await this.helpers.httpRequestWithAuthentication.call(
+				this,
+				'imagekitApi',
+				options,
+			);
+			if (Array.isArray(responseData)) {
+				return this.helpers.returnJsonArray(responseData as IDataObject[]);
+			}
+			return [{ json: responseData as IDataObject }];
+		}
+		case 'getUsageAnalytics': {
+			const startDate = this.getNodeParameter('startDate', i) as string;
+			const endDate = this.getNodeParameter('endDate', i) as string;
+			options = {
+				method: 'GET',
+				baseURL: 'https://api.imagekit.io',
+				url: '/v1/accounts/usage-analytics',
 				qs: { startDate, endDate },
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(

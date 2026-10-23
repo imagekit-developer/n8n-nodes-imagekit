@@ -50,6 +50,18 @@
       "article": "a",
       "defaultOperation": "list"
     },
+    "namedTransformation": {
+      "displayName": "Named Transformation",
+      "singular": "named transformation",
+      "article": "a",
+      "defaultOperation": "list"
+    },
+    "webhook": {
+      "displayName": "Webhook",
+      "singular": "webhook",
+      "article": "a",
+      "defaultOperation": "list"
+    },
     "customMetadataFields": {
       "displayName": "Custom Metadata Fields",
       "singular": "custom metadata field",
@@ -69,9 +81,10 @@
     "upload-file",
     "upload-file-v2",
     "update-file-details",
-    "publish-file",
     "list-and-search-assets"
   ],
+  "_ignored_comment": "Spec operationIds intentionally not surfaced in n8n (internal/SDK-only endpoints). Excluded from the drift and Stainless reports.",
+  "ignored": ["create-dummy-test"],
   "operations": {
     "get-usage": {
       "resource": "account",
@@ -93,6 +106,29 @@
           "required": true,
           "placeholder": "YYYY-MM-DD",
           "description": "End date for the usage period (format: YYYY-MM-DD)"
+        }
+      }
+    },
+    "get-usage-analytics": {
+      "resource": "account",
+      "operation": "getUsageAnalytics",
+      "name": "Get Usage Analytics",
+      "action": "Get account usage analytics",
+      "description": "Get account analytics (requests, bandwidth, status codes, cache, extensions, video processing) between two dates (beta)",
+      "queryParams": {
+        "startDate": {
+          "displayName": "Start Date",
+          "type": "string",
+          "required": true,
+          "placeholder": "YYYY-MM-DD",
+          "description": "Start date for the analytics period (format: YYYY-MM-DD, UTC). Range must be less than 90 days."
+        },
+        "endDate": {
+          "displayName": "End Date",
+          "type": "string",
+          "required": true,
+          "placeholder": "YYYY-MM-DD",
+          "description": "End date for the analytics period (format: YYYY-MM-DD, UTC). Range must be less than 90 days."
         }
       }
     },
@@ -487,6 +523,153 @@
       }
     },
 
+    "list-named-transformations": {
+      "resource": "namedTransformation",
+      "operation": "list",
+      "name": "List",
+      "action": "List named transformations",
+      "description": "List all named transformations"
+    },
+    "create-named-transformation": {
+      "resource": "namedTransformation",
+      "operation": "create",
+      "name": "Create",
+      "action": "Create a named transformation",
+      "description": "Create a new named transformation",
+      "bodyFields": {
+        "name": {
+          "displayName": "Name",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "Alias used in URLs as tr:n-&lt;name&gt;; alphanumeric or underscore"
+        },
+        "transformation": {
+          "displayName": "Transformation",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The transformation string, e.g. w-150,h-150,fo-center,cm-pad_resize"
+        },
+        "enabled": {
+          "displayName": "Enabled",
+          "type": "boolean",
+          "required": false,
+          "default": true,
+          "description": "Whether the named transformation is enabled"
+        }
+      }
+    },
+    "get-named-transformation": {
+      "resource": "namedTransformation",
+      "operation": "get",
+      "name": "Get",
+      "action": "Get a named transformation",
+      "description": "Get details of a specific named transformation",
+      "pathParams": {
+        "id": { "name": "namedTransformationId", "displayName": "Named Transformation ID", "description": "The ID of the named transformation to get" }
+      }
+    },
+    "update-named-transformation": {
+      "resource": "namedTransformation",
+      "operation": "update",
+      "name": "Update",
+      "action": "Update a named transformation",
+      "description": "Update an existing named transformation",
+      "pathParams": {
+        "id": { "name": "namedTransformationId", "displayName": "Named Transformation ID", "description": "The ID of the named transformation to update" }
+      },
+      "body": {
+        "name": "namedTransformationData",
+        "displayName": "Named Transformation Data (JSON)",
+        "description": "JSON object with fields to update (name, transformation, enabled)"
+      }
+    },
+    "delete-named-transformation": {
+      "resource": "namedTransformation",
+      "operation": "delete",
+      "name": "Delete",
+      "action": "Delete a named transformation",
+      "description": "Delete a named transformation",
+      "pathParams": {
+        "id": { "name": "namedTransformationId", "displayName": "Named Transformation ID", "description": "The ID of the named transformation to delete" }
+      }
+    },
+
+    "list-webhooks": {
+      "resource": "webhook",
+      "operation": "list",
+      "name": "List",
+      "action": "List webhooks",
+      "description": "List all webhooks"
+    },
+    "create-webhook": {
+      "resource": "webhook",
+      "operation": "create",
+      "name": "Create",
+      "action": "Create a webhook",
+      "description": "Create a new webhook",
+      "bodyFields": {
+        "endpoint": {
+          "displayName": "Endpoint",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "description": "The http(s) URL that receives webhook deliveries"
+        },
+        "events": {
+          "displayName": "Events",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "transform": "csv",
+          "description": "Comma-separated list of event types to subscribe to, e.g. file.created, video.transformation.ready. See https://imagekit.io/docs/webhooks#list-of-events."
+        },
+        "enabled": {
+          "displayName": "Enabled",
+          "type": "boolean",
+          "required": false,
+          "default": true,
+          "description": "Whether the webhook is enabled"
+        }
+      }
+    },
+    "get-webhook": {
+      "resource": "webhook",
+      "operation": "get",
+      "name": "Get",
+      "action": "Get a webhook",
+      "description": "Get details of a specific webhook",
+      "pathParams": {
+        "id": { "name": "webhookId", "displayName": "Webhook ID", "description": "The ID of the webhook to get" }
+      }
+    },
+    "update-webhook": {
+      "resource": "webhook",
+      "operation": "update",
+      "name": "Update",
+      "action": "Update a webhook",
+      "description": "Update an existing webhook",
+      "pathParams": {
+        "id": { "name": "webhookId", "displayName": "Webhook ID", "description": "The ID of the webhook to update" }
+      },
+      "body": {
+        "name": "webhookData",
+        "displayName": "Webhook Data (JSON)",
+        "description": "JSON object with fields to update (endpoint, events, enabled)"
+      }
+    },
+    "delete-webhook": {
+      "resource": "webhook",
+      "operation": "delete",
+      "name": "Delete",
+      "action": "Delete a webhook",
+      "description": "Delete a webhook",
+      "pathParams": {
+        "id": { "name": "webhookId", "displayName": "Webhook ID", "description": "The ID of the webhook to delete" }
+      }
+    },
+
     "create-new-field": {
       "resource": "customMetadataFields",
       "operation": "create",
@@ -763,6 +946,11 @@
       "displayName": "File",
       "description": "Triggers when files are created, updated, or deleted in your ImageKit Media Library",
       "events": ["file-created", "file-updated", "file-deleted"]
+    },
+    "folder": {
+      "displayName": "Folder",
+      "description": "Triggers when folders are created, updated, or deleted",
+      "events": ["folder-created", "folder-updated", "folder-deleted"]
     },
     "fileVersion": {
       "displayName": "File Version",
