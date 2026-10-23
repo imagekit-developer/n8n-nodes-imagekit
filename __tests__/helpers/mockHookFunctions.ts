@@ -16,10 +16,7 @@ interface MockHookContext {
 
 const DEFAULT_WEBHOOK_URL = 'https://n8n.example/webhook/abc/imagekit-webhook';
 
-/** Minimal IHookFunctions mock for the trigger's webhookMethods tests.
- *  `apiResponses` are consumed in call order: Error instances reject,
- *  anything else resolves. `staticData` is the live object behind
- *  getWorkflowStaticData so tests can assert on it directly. */
+/** `apiResponses` are consumed in call order: Error instances reject, anything else resolves. */
 export function createMockHookFunctions(options: MockHookFunctionsOptions = {}): MockHookContext {
 	const {
 		nodeParameters = {},

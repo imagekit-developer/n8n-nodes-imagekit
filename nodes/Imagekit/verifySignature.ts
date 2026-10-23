@@ -1,36 +1,18 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 
-/**
- * Result of verifying an ImageKit webhook signature.
- *
- * - `valid: true`  — the request is authentic and within the timestamp tolerance.
- * - `valid: false` — `reason` describes why; useful for the 401 response body and tests.
- */
 export type VerifyResult =
 	| { valid: true; timestamp: number }
 	| { valid: false; reason: string };
 
 export interface VerifyOptions {
-	/** Maximum allowed clock skew between ImageKit and our server, in milliseconds.
-	 *  Requests with a timestamp older or newer than this are rejected to mitigate
-	 *  replay attacks. Default: 5 minutes (matches Stripe / Standard Webhooks). */
 	toleranceMs?: number;
-	/** Override the current time. Used by tests; pass `Date.now()` in production. */
 	now?: number;
 }
 
 /**
- * Verify an ImageKit webhook delivery using the legacy `x-ik-signature` header.
- *
- * Algorithm (per https://imagekit.io/docs/webhooks#verify-signature-manually):
- *   1. The header is `t=<unix-ms>,v1=<hex-hmac-sha256>`.
- *   2. The HMAC payload is `${timestamp}.${rawBody}` (UTF-8 string concat).
- *   3. The HMAC key is the webhook signing secret.
- *
- * **Important:** the verification *must* run against the raw, unparsed request
- * body — re-serialising the parsed JSON loses key order and whitespace, which
- * changes the HMAC. n8n's express layer preserves the raw text on
- * `req.rawBody`; trigger nodes pass that buffer/string in here.
+ * Verifies the `t=<unix-ms>,v1=<hex-hmac-sha256>` header per
+ * https://imagekit.io/docs/webhooks#verify-signature-manually. Must run against
+ * the raw request body: re-serialising parsed JSON changes the HMAC.
  */
 export function verifyImagekitSignature(
 	rawBody: Buffer | string | undefined,
@@ -45,7 +27,6 @@ export function verifyImagekitSignature(
 	const headerValue = Array.isArray(signatureHeader) ? signatureHeader[0] : signatureHeader;
 	if (!headerValue) return { valid: false, reason: 'missing-signature-header' };
 
-	// Parse `t=...,v1=...` (order-independent, accepts extra fields).
 	const parts: Record<string, string> = {};
 	for (const segment of headerValue.split(',')) {
 		const eq = segment.indexOf('=');
@@ -74,8 +55,7 @@ export function verifyImagekitSignature(
 		.update(`${timestampStr}.${bodyStr}`)
 		.digest('hex');
 
-	// Length check first to keep `timingSafeEqual` happy and to short-circuit
-	// the obvious garbage cases without leaking timing information.
+	// timingSafeEqual throws on unequal lengths.
 	if (computedHex.length !== expectedHex.length) {
 		return { valid: false, reason: 'signature-mismatch' };
 	}

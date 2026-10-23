@@ -8,10 +8,6 @@ import type {
 import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { assetDescription, executeAsset } from './resources/asset';
 import { fileDescription, executeFile } from './resources/file';
-// Resources below are produced by scripts/generate.ts from
-// openapi/openapi.yml + openapi/config.json. See openapi/README.md.
-// `file` is partial codegen — its splicer at ./resources/file composes
-// the 9 generated ops with hand-written `upload` + `update`.
 import { customMetadataFieldsDescription, executeCustomMetadataFields } from './resources/_generated/customMetadataFields';
 import { fileVersionDescription, executeFileVersion } from './resources/_generated/fileVersion';
 import { metadataDescription, executeMetadata } from './resources/_generated/metadata';
@@ -197,9 +193,6 @@ export class Imagekit implements INodeType {
 				}
 			} catch (error) {
 				if (this.continueOnFail()) {
-					// pairedItem preserves the link back to the input item that
-					// produced this error so downstream nodes can correlate failures
-					// with the originating row when running in continueOnFail mode.
 					returnData.push({ json: { error: (error as Error).message }, pairedItem: { item: i } });
 					continue;
 				}
