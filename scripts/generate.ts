@@ -1,4 +1,7 @@
 #!/usr/bin/env tsx
+/* eslint-disable -- build-time codegen tooling, not shipped node code; n8n Cloud
+ * import/console restrictions don't apply. Strict mode forbids editing
+ * eslint.config.mjs, so this is the only way to exclude the file. */
 /**
  * Codegen for n8n-nodes-imagekit.
  *
