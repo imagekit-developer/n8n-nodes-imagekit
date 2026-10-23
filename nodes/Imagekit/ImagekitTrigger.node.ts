@@ -18,7 +18,7 @@ const WEBHOOK_PERMISSION_MESSAGE =
 	'The ImageKit API key in your ImageKit API credential is not allowed to manage webhooks (HTTP 403). Standard keys cannot access webhooks: use a restricted API key with webhook access (https://imagekit.io/docs/api-keys), or create the webhook in the ImageKit dashboard yourself and turn off "Automatic Webhook Setup" on this node.';
 
 /** v1 nodes predate auto-registration, so an absent param means manual. */
-function isAutoWebhookSetup(ctx: IHookFunctions): boolean {
+function isAutoWebhookSetup(ctx: IHookFunctions | IWebhookFunctions): boolean {
 	return ctx.getNodeParameter('autoWebhookSetup', ctx.getNode().typeVersion !== 1) as boolean;
 }
 
@@ -33,10 +33,6 @@ function isForbidden(error: unknown): boolean {
 	return Number(e?.httpCode ?? e?.statusCode ?? e?.response?.status) === 403;
 }
 
-/** Single trigger node for every ImageKit webhook event. Sits next to
- *  Imagekit.node.ts so n8n's picker groups them under one "Imagekit"
- *  panel (Actions + Triggers) — same convention as Slack/SlackTrigger.
- *  See https://imagekit.io/docs/webhooks for payload structure. */
 export class ImagekitTrigger implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'ImageKit Trigger',
@@ -50,8 +46,6 @@ export class ImagekitTrigger implements INodeType {
 			'Triggers on ImageKit webhook events (file and folder lifecycle, transformations, video processing).',
 		eventTriggerDescription: 'Waiting for an ImageKit webhook delivery',
 		defaults: { name: 'ImageKit Trigger' },
-		// Surfaces the trigger as an AI tool so agents can subscribe to ImageKit
-		// webhook events programmatically (matches the n8n strict-lint default).
 		usableAsTool: true,
 		inputs: [],
 		outputs: [NodeConnectionTypes.Main],
@@ -65,10 +59,6 @@ export class ImagekitTrigger implements INodeType {
 				name: 'imagekitWebhookApi',
 				required: false,
 				displayOptions: { show: { autoWebhookSetup: [false] } },
-				// Locally-defined HMAC sanity check; see methods.credentialTest below.
-				// n8n's credential-test-required lint rule requires every node-level
-				// usage of a credential to declare either an HTTP test or a testedBy
-				// reference, since webhook signing secrets can't be remotely validated.
 				testedBy: 'imagekitWebhookSecretTest',
 			},
 		],
@@ -241,6 +231,7 @@ export class ImagekitTrigger implements INodeType {
 				if (!isAutoWebhookSetup(this)) return true;
 				try {
 					const webhookUrl = this.getNodeWebhookUrl('default');
+					const events = this.getNodeParameter('events') as string[];
 					const staticData = this.getWorkflowStaticData('node');
 					const webhooks = (await this.helpers.httpRequestWithAuthentication.call(
 						this,
@@ -252,19 +243,25 @@ export class ImagekitTrigger implements INodeType {
 						},
 					)) as IDataObject[];
 					// Match by URL (not stored id) so manually-registered webhooks are
-					// adopted and re-activation still works if static data was lost.
+					// adopted, events are reconciled with the current parameter, and
+					// re-activation still works if static data was lost.
 					const existing = webhooks.find((w) => w.endpoint === webhookUrl);
 					if (!existing) {
 						delete staticData.webhookId;
 						delete staticData.secret;
 						return false;
 					}
-					if (existing.enabled === false) {
+					const existingEvents = [...((existing.events as string[] | undefined) ?? [])].sort();
+					const wantedEvents = [...events].sort();
+					const eventsDiffer =
+						existingEvents.length !== wantedEvents.length ||
+						existingEvents.some((e, i) => e !== wantedEvents[i]);
+					if (existing.enabled === false || eventsDiffer) {
 						await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', {
 							method: 'PATCH',
 							baseURL: 'https://api.imagekit.io',
 							url: `/v1/accounts/webhooks/${existing.id}`,
-							body: { enabled: true },
+							body: { enabled: true, events },
 						});
 					}
 					staticData.webhookId = existing.id;
@@ -344,26 +341,22 @@ export class ImagekitTrigger implements INodeType {
 		const eventType = (body.type as string | undefined) ?? '';
 
 		if (verify) {
-			// Secret resolution: the auto-registered webhook's secret lives in
-			// static data; the optional ImagekitWebhookApi credential supplies it
-			// in manual mode. getCredentials throws when the optional credential
-			// isn't set, so swallow that.
+			// Manual mode uses only the credential so a stale static-data secret can't
+			// shadow it. getCredentials throws when the optional credential isn't set.
 			const staticData = this.getWorkflowStaticData('node');
-			let secret = staticData.secret as string | undefined;
-			if (!secret) {
-				const credentials = await this.getCredentials('imagekitWebhookApi').catch(
-					() => undefined,
-				);
-				secret = credentials?.secret as string | undefined;
-			}
+			const credentialSecret = async () =>
+				(await this.getCredentials('imagekitWebhookApi').catch(() => undefined))?.secret as
+					| string
+					| undefined;
+			const secret = isAutoWebhookSetup(this)
+				? (staticData.secret as string | undefined) || (await credentialSecret())
+				: await credentialSecret();
 			if (!secret) {
 				const res = this.getResponseObject();
 				res.status(401).json({ error: 'invalid-signature', reason: 'no-secret' });
 				return { noWebhookResponse: true };
 			}
-			// n8n's express layer preserves the raw text on req.rawBody; we need
-			// it because re-stringifying the parsed body would change byte
-			// ordering and break the HMAC.
+			// Re-stringifying the parsed body would change bytes and break the HMAC.
 			const req = this.getRequestObject() as unknown as { rawBody?: Buffer | string };
 			const result = verifyImagekitSignature(
 				req.rawBody,
@@ -378,8 +371,7 @@ export class ImagekitTrigger implements INodeType {
 			}
 		}
 
-		// Drop deliveries that aren't in the user-selected events filter.
-		// 200-ack so ImageKit doesn't retry; the workflow just doesn't run.
+		// 200-ack unselected events so ImageKit doesn't retry.
 		if (events.length > 0 && !events.includes(eventType)) {
 			return { noWebhookResponse: false, workflowData: [] };
 		}
@@ -387,13 +379,8 @@ export class ImagekitTrigger implements INodeType {
 		return { workflowData: [this.helpers.returnJsonArray([body])] };
 	}
 
-	/** Local credential test for ImagekitWebhookApi. n8n's credential lint
-	 *  rule requires every credential to declare a `test` or `testedBy`,
-	 *  and webhook signing secrets cannot be remotely validated (there is no
-	 *  ImageKit endpoint that accepts the secret to confirm it). So this test
-	 *  runs the secret through the same HMAC-SHA256 routine the runtime
-	 *  webhook handler uses, catching malformed inputs (empty, non-string,
-	 *  unsupported encodings) before any delivery is received. */
+	/** Webhook signing secrets can't be validated remotely, so this only checks
+	 *  the secret is usable as an HMAC-SHA256 key. */
 	methods = {
 		credentialTest: {
 			async imagekitWebhookSecretTest(
@@ -413,9 +400,6 @@ export class ImagekitTrigger implements INodeType {
 					};
 				}
 				try {
-					// Same HMAC routine the runtime handler uses. If Node's crypto
-					// rejects the key (e.g. unsupported encoding) this throws and we
-					// surface the underlying message to the user.
 					createHmac('sha256', secret).update('imagekit-credential-test').digest('hex');
 				} catch (error) {
 					return {
