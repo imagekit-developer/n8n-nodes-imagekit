@@ -10,9 +10,28 @@ import type {
 	IWebhookFunctions,
 	IWebhookResponseData,
 } from 'n8n-workflow';
-import { NodeConnectionTypes } from 'n8n-workflow';
+import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { createHmac } from 'crypto';
 import { verifyImagekitSignature } from './verifySignature';
+
+const WEBHOOK_PERMISSION_MESSAGE =
+	'The ImageKit API key in your ImageKit API credential is not allowed to manage webhooks (HTTP 403). Standard keys cannot access webhooks: use a restricted API key with webhook access (https://imagekit.io/docs/api-keys), or create the webhook in the ImageKit dashboard yourself and turn off "Automatic Webhook Setup" on this node.';
+
+/** v1 nodes predate auto-registration, so an absent param means manual. */
+function isAutoWebhookSetup(ctx: IHookFunctions): boolean {
+	return ctx.getNodeParameter('autoWebhookSetup', ctx.getNode().typeVersion !== 1) as boolean;
+}
+
+/** n8n wraps HTTP failures in NodeApiError (httpCode is a string); fall back
+ *  to the raw axios shape in case the helper ever rethrows unwrapped. */
+function isForbidden(error: unknown): boolean {
+	const e = error as {
+		httpCode?: string | number;
+		statusCode?: number;
+		response?: { status?: number };
+	};
+	return Number(e?.httpCode ?? e?.statusCode ?? e?.response?.status) === 403;
+}
 
 /** Single trigger node for every ImageKit webhook event. Sits next to
  *  Imagekit.node.ts so n8n's picker groups them under one "Imagekit"
@@ -24,7 +43,8 @@ export class ImagekitTrigger implements INodeType {
 		name: 'imagekitTrigger',
 		icon: { light: 'file:imagekit.light.svg', dark: 'file:imagekit.dark.svg' },
 		group: ['trigger'],
-		version: 1,
+		version: [1, 2],
+		defaultVersion: 2,
 		subtitle: '={{$parameter["events"].join(", ")}}',
 		description:
 			'Triggers on ImageKit webhook events (file and folder lifecycle, transformations, video processing).',
@@ -39,10 +59,12 @@ export class ImagekitTrigger implements INodeType {
 			{
 				name: 'imagekitApi',
 				required: true,
+				displayOptions: { show: { autoWebhookSetup: [true] } },
 			},
 			{
 				name: 'imagekitWebhookApi',
 				required: false,
+				displayOptions: { show: { autoWebhookSetup: [false] } },
 				// Locally-defined HMAC sanity check; see methods.credentialTest below.
 				// n8n's credential-test-required lint rule requires every node-level
 				// usage of a credential to declare either an HTTP test or a testedBy
@@ -59,6 +81,44 @@ export class ImagekitTrigger implements INodeType {
 			},
 		],
 		properties: [
+			// The notices sit before the toggle on purpose: n8n renders the
+			// credential picker right before the last parameter the credentials'
+			// displayOptions depend on (autoWebhookSetup), so this yields
+			// notice -> credential -> toggle in the panel.
+			{
+				displayName:
+					'The webhook is created in ImageKit automatically when this workflow is activated. This needs a <a href="https://imagekit.io/docs/api-keys" target="_blank">restricted API key</a> with webhook access; otherwise turn off "Automatic Webhook Setup".',
+				name: 'autoWebhookNotice',
+				type: 'notice',
+				default: '',
+				displayOptions: { show: { autoWebhookSetup: [true] } },
+			},
+			{
+				displayName:
+					'Create the webhook in the <a href="https://imagekit.io/dashboard/developer/webhooks" target="_blank">ImageKit dashboard</a> with the URL above, then paste its signing secret into the ImageKit Webhook API credential below.',
+				name: 'manualWebhookNotice',
+				type: 'notice',
+				default: '',
+				displayOptions: { show: { autoWebhookSetup: [false] } },
+			},
+			{
+				displayName: 'Automatic Webhook Setup',
+				name: 'autoWebhookSetup',
+				type: 'boolean',
+				default: false,
+				displayOptions: { show: { '@version': [1] } },
+				description:
+					'Whether n8n should create the webhook in ImageKit when this workflow is activated and remove it on deactivation. Requires a restricted API key with webhook access. Turn off if you created the webhook yourself in the ImageKit dashboard; you then supply its signing secret via an ImageKit Webhook API credential.',
+			},
+			{
+				displayName: 'Automatic Webhook Setup',
+				name: 'autoWebhookSetup',
+				type: 'boolean',
+				default: true,
+				displayOptions: { show: { '@version': [2] } },
+				description:
+					'Whether n8n should create the webhook in ImageKit when this workflow is activated and remove it on deactivation. Requires a restricted API key with webhook access. Turn off if you created the webhook yourself in the ImageKit dashboard; you then supply its signing secret via an ImageKit Webhook API credential.',
+			},
 			{
 				displayName: 'Events',
 				name: 'events',
@@ -152,11 +212,11 @@ export class ImagekitTrigger implements INodeType {
 				type: 'boolean',
 				default: true,
 				description:
-					'Whether to validate the x-ik-signature header. The signing secret is fetched automatically when the webhook is registered on activation; an ImageKit Webhook credential is only needed if you registered the webhook manually in the dashboard.',
+					'Whether to validate the x-ik-signature header. The signing secret is fetched automatically when the webhook is registered on activation; an ImageKit Webhook API credential is only needed when "Automatic Webhook Setup" is off.',
 			},
 			{
 				displayName:
-					'Signature verification is disabled. Any caller who discovers this webhook URL can trigger this workflow with arbitrary payloads. Re-enable verification (and connect an ImageKit Webhook credential) before going to production.',
+					'Signature verification is disabled. Any caller who discovers this webhook URL can trigger this workflow with arbitrary payloads. Re-enable verification (and connect an ImageKit Webhook API credential) before going to production.',
 				name: 'verifySignatureDisabledNotice',
 				type: 'notice',
 				default: '',
@@ -178,56 +238,79 @@ export class ImagekitTrigger implements INodeType {
 	webhookMethods = {
 		default: {
 			async checkExists(this: IHookFunctions): Promise<boolean> {
-				const webhookUrl = this.getNodeWebhookUrl('default');
-				const staticData = this.getWorkflowStaticData('node');
-				const webhooks = (await this.helpers.httpRequestWithAuthentication.call(
-					this,
-					'imagekitApi',
-					{
-						method: 'GET',
-						baseURL: 'https://api.imagekit.io',
-						url: '/v1/accounts/webhooks',
-					},
-				)) as IDataObject[];
-				// Match by URL (not stored id) so manually-registered webhooks are
-				// adopted and re-activation still works if static data was lost.
-				const existing = webhooks.find((w) => w.endpoint === webhookUrl);
-				if (!existing) {
-					delete staticData.webhookId;
-					delete staticData.secret;
-					return false;
+				if (!isAutoWebhookSetup(this)) return true;
+				try {
+					const webhookUrl = this.getNodeWebhookUrl('default');
+					const staticData = this.getWorkflowStaticData('node');
+					const webhooks = (await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'imagekitApi',
+						{
+							method: 'GET',
+							baseURL: 'https://api.imagekit.io',
+							url: '/v1/accounts/webhooks',
+						},
+					)) as IDataObject[];
+					// Match by URL (not stored id) so manually-registered webhooks are
+					// adopted and re-activation still works if static data was lost.
+					const existing = webhooks.find((w) => w.endpoint === webhookUrl);
+					if (!existing) {
+						delete staticData.webhookId;
+						delete staticData.secret;
+						return false;
+					}
+					if (existing.enabled === false) {
+						await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', {
+							method: 'PATCH',
+							baseURL: 'https://api.imagekit.io',
+							url: `/v1/accounts/webhooks/${existing.id}`,
+							body: { enabled: true },
+						});
+					}
+					staticData.webhookId = existing.id;
+					staticData.secret = existing.secret;
+					return true;
+				} catch (error) {
+					if (isForbidden(error)) {
+						throw new NodeOperationError(this.getNode(), WEBHOOK_PERMISSION_MESSAGE, {
+							description:
+								'Webhook registration needs the "Webhooks" permission on the ImageKit private key.',
+						});
+					}
+					throw error;
 				}
-				if (existing.enabled === false) {
-					await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', {
-						method: 'PATCH',
-						baseURL: 'https://api.imagekit.io',
-						url: `/v1/accounts/webhooks/${existing.id}`,
-						body: { enabled: true },
-					});
-				}
-				staticData.webhookId = existing.id;
-				staticData.secret = existing.secret;
-				return true;
 			},
 			async create(this: IHookFunctions): Promise<boolean> {
-				const webhookUrl = this.getNodeWebhookUrl('default');
-				const events = this.getNodeParameter('events') as string[];
-				const staticData = this.getWorkflowStaticData('node');
-				const webhook = (await this.helpers.httpRequestWithAuthentication.call(
-					this,
-					'imagekitApi',
-					{
-						method: 'POST',
-						baseURL: 'https://api.imagekit.io',
-						url: '/v1/accounts/webhooks',
-						body: { endpoint: webhookUrl, events, enabled: true },
-					},
-				)) as IDataObject;
-				staticData.webhookId = webhook.id;
-				staticData.secret = webhook.secret;
-				return true;
+				if (!isAutoWebhookSetup(this)) return true;
+				try {
+					const webhookUrl = this.getNodeWebhookUrl('default');
+					const events = this.getNodeParameter('events') as string[];
+					const staticData = this.getWorkflowStaticData('node');
+					const webhook = (await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'imagekitApi',
+						{
+							method: 'POST',
+							baseURL: 'https://api.imagekit.io',
+							url: '/v1/accounts/webhooks',
+							body: { endpoint: webhookUrl, events, enabled: true },
+						},
+					)) as IDataObject;
+					staticData.webhookId = webhook.id;
+					staticData.secret = webhook.secret;
+					return true;
+				} catch (error) {
+					if (isForbidden(error)) {
+						throw new NodeOperationError(this.getNode(), WEBHOOK_PERMISSION_MESSAGE, {
+							description:
+								'Webhook registration needs the "Webhooks" permission on the ImageKit private key.',
+						});
+					}
+					throw error;
+				}
 			},
 			async delete(this: IHookFunctions): Promise<boolean> {
+				if (!isAutoWebhookSetup(this)) return true;
 				const staticData = this.getWorkflowStaticData('node');
 				const webhookId = staticData.webhookId as string | undefined;
 				if (webhookId) {
@@ -262,9 +345,9 @@ export class ImagekitTrigger implements INodeType {
 
 		if (verify) {
 			// Secret resolution: the auto-registered webhook's secret lives in
-			// static data; the optional ImagekitWebhookApi credential is the
-			// fallback for manually-registered setups. getCredentials throws
-			// when the optional credential isn't set, so swallow that.
+			// static data; the optional ImagekitWebhookApi credential supplies it
+			// in manual mode. getCredentials throws when the optional credential
+			// isn't set, so swallow that.
 			const staticData = this.getWorkflowStaticData('node');
 			let secret = staticData.secret as string | undefined;
 			if (!secret) {

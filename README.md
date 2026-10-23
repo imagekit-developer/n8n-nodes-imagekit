@@ -63,7 +63,13 @@ To use this node, create ImageKit API credentials in n8n.
 4. In n8n, create credentials of type **ImageKit API**.
 5. Paste the private key and save the credentials.
 
-For webhook triggers, only the **ImageKit API** credential is required: the **ImageKit Trigger** node registers its webhook with ImageKit automatically when the workflow is activated and removes it on deactivation. If you change the **Events** parameter, de-activate and re-activate the workflow so the subscription is recreated. The **ImageKit Webhook API** credential is optional and only needed if you registered the webhook manually in the ImageKit dashboard.
+The **ImageKit Trigger** node has an **Automatic Webhook Setup** toggle, which is on by default for new triggers.
+
+With the toggle on, the node only needs the **ImageKit API** credential. When you activate the workflow, the node creates the webhook in ImageKit, and when you deactivate it, the node deletes the webhook. The API key must have webhook access. Standard keys do not, so use a [restricted API key](https://imagekit.io/docs/api-keys) with webhook access. If activation fails with HTTP 403, the key does not have this access: use a restricted key, or turn the toggle off. If you change the **Events** parameter, deactivate and reactivate the workflow so the webhook is recreated with the new events.
+
+With the toggle off, the node does not create or delete anything in ImageKit. Create the webhook yourself in the ImageKit dashboard, using the URL shown on the trigger node. The node then shows the **ImageKit Webhook API** credential. Paste the signing secret of your webhook into it so the node can verify signatures.
+
+Triggers created with versions before 2.0 have the toggle off and continue to work as before. To switch them to automatic setup, turn the toggle on and attach an **ImageKit API** credential.
 
 **Security note:** Your ImageKit private key can perform privileged account operations. Store it only in n8n credentials and never expose it in workflow data, logs, frontend code, or shared screenshots.
 

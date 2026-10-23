@@ -1,3 +1,4 @@
+import { NodeOperationError } from 'n8n-workflow';
 import { ImagekitTrigger } from '../../nodes/Imagekit/ImagekitTrigger.node';
 import { createMockHookFunctions } from '../helpers/mockHookFunctions';
 
@@ -37,6 +38,24 @@ describe('ImagekitTrigger webhookMethods', () => {
 
 			expect(result).toBe(false);
 			expect(staticData).toEqual({});
+		});
+
+		it('turns a 403 into a NodeOperationError pointing to manual mode', async () => {
+			const { context } = createMockHookFunctions({
+				apiResponses: [Object.assign(new Error('Forbidden'), { httpCode: '403' })],
+			});
+
+			const call = hooks().checkExists.call(context);
+			await expect(call).rejects.toThrow(/Automatic Webhook Setup/);
+			await expect(call).rejects.toBeInstanceOf(NodeOperationError);
+		});
+
+		it('rethrows non-403 errors unchanged', async () => {
+			const { context } = createMockHookFunctions({
+				apiResponses: [Object.assign(new Error('boom'), { httpCode: '500' })],
+			});
+
+			await expect(hooks().checkExists.call(context)).rejects.toThrow('boom');
 		});
 
 		it('re-enables a disabled matching webhook', async () => {
@@ -81,6 +100,17 @@ describe('ImagekitTrigger webhookMethods', () => {
 			);
 			expect(staticData).toEqual({ webhookId: 'wh_2', secret: 'whsec_2' });
 		});
+
+		it('turns a 403 into a NodeOperationError pointing to manual mode', async () => {
+			const { context } = createMockHookFunctions({
+				nodeParameters: { events: ['file.created'] },
+				apiResponses: [Object.assign(new Error('Forbidden'), { httpCode: '403' })],
+			});
+
+			const call = hooks().create.call(context);
+			await expect(call).rejects.toThrow(/Automatic Webhook Setup/);
+			await expect(call).rejects.toBeInstanceOf(NodeOperationError);
+		});
 	});
 
 	describe('delete', () => {
@@ -120,6 +150,66 @@ describe('ImagekitTrigger webhookMethods', () => {
 			expect(result).toBe(true);
 			expect(staticData).toEqual({});
 			expect(context.logger.warn).toHaveBeenCalledTimes(1);
+		});
+	});
+
+	describe('manual mode', () => {
+		const manualOptions = {
+			nodeParameters: { autoWebhookSetup: false },
+			staticData: { webhookId: 'wh_1', secret: 's' },
+		};
+
+		it('checkExists returns true without calling the API or touching static data', async () => {
+			const { context, staticData, http } = createMockHookFunctions(manualOptions);
+
+			const result = await hooks().checkExists.call(context);
+
+			expect(result).toBe(true);
+			expect(http).not.toHaveBeenCalled();
+			expect(staticData).toEqual({ webhookId: 'wh_1', secret: 's' });
+		});
+
+		it('create returns true without calling the API', async () => {
+			const { context, http } = createMockHookFunctions(manualOptions);
+
+			const result = await hooks().create.call(context);
+
+			expect(result).toBe(true);
+			expect(http).not.toHaveBeenCalled();
+		});
+
+		it('delete returns true without calling the API', async () => {
+			const { context, http } = createMockHookFunctions(manualOptions);
+
+			const result = await hooks().delete.call(context);
+
+			expect(result).toBe(true);
+			expect(http).not.toHaveBeenCalled();
+		});
+
+		it('a typeVersion 1 node with no autoWebhookSetup parameter takes the manual path', async () => {
+			const { context, http } = createMockHookFunctions({
+				typeVersion: 1,
+				apiResponses: [[]],
+			});
+
+			const result = await hooks().checkExists.call(context);
+
+			expect(result).toBe(true);
+			expect(http).not.toHaveBeenCalled();
+		});
+
+		it('a typeVersion 1 node that opted in to auto setup uses auto-registration', async () => {
+			const { context, http } = createMockHookFunctions({
+				typeVersion: 1,
+				nodeParameters: { autoWebhookSetup: true },
+				apiResponses: [[]],
+			});
+
+			const result = await hooks().checkExists.call(context);
+
+			expect(result).toBe(false);
+			expect(http).toHaveBeenCalledTimes(1);
 		});
 	});
 });
