@@ -13,6 +13,7 @@ import type {
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { createHmac } from 'crypto';
 import { verifyImagekitSignature } from './verifySignature';
+import { getHookCredentialType } from './credentialType';
 
 const WEBHOOK_PERMISSION_MESSAGE =
 	'The ImageKit API key in your ImageKit API credential is not allowed to manage webhooks (HTTP 403). Standard keys cannot access webhooks: use a restricted API key with webhook access (https://imagekit.io/docs/api-keys), or create the webhook in the ImageKit dashboard yourself and turn off "Automatic Webhook Setup" on this node.';
@@ -53,7 +54,12 @@ export class ImagekitTrigger implements INodeType {
 			{
 				name: 'imagekitApi',
 				required: true,
-				displayOptions: { show: { autoWebhookSetup: [true] } },
+				displayOptions: { show: { autoWebhookSetup: [true], authentication: ['apiKey'] } },
+			},
+			{
+				name: 'imagekitOAuth2Api',
+				required: true,
+				displayOptions: { show: { autoWebhookSetup: [true], authentication: ['oAuth2'] } },
 			},
 			{
 				name: 'imagekitWebhookApi',
@@ -90,6 +96,24 @@ export class ImagekitTrigger implements INodeType {
 				type: 'notice',
 				default: '',
 				displayOptions: { show: { autoWebhookSetup: [false] } },
+			},
+			{
+				displayName: 'Authentication',
+				name: 'authentication',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: { show: { autoWebhookSetup: [true] } },
+				options: [
+					{
+						name: 'API Key',
+						value: 'apiKey',
+					},
+					{
+						name: 'OAuth2',
+						value: 'oAuth2',
+					},
+				],
+				default: 'apiKey',
 			},
 			{
 				displayName: 'Automatic Webhook Setup',
@@ -235,7 +259,7 @@ export class ImagekitTrigger implements INodeType {
 					const staticData = this.getWorkflowStaticData('node');
 					const webhooks = (await this.helpers.httpRequestWithAuthentication.call(
 						this,
-						'imagekitApi',
+						getHookCredentialType(this),
 						{
 							method: 'GET',
 							baseURL: 'https://api.imagekit.io',
@@ -257,7 +281,7 @@ export class ImagekitTrigger implements INodeType {
 						existingEvents.length !== wantedEvents.length ||
 						existingEvents.some((e, i) => e !== wantedEvents[i]);
 					if (existing.enabled === false || eventsDiffer) {
-						await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', {
+						await this.helpers.httpRequestWithAuthentication.call(this, getHookCredentialType(this), {
 							method: 'PATCH',
 							baseURL: 'https://api.imagekit.io',
 							url: `/v1/accounts/webhooks/${existing.id}`,
@@ -285,7 +309,7 @@ export class ImagekitTrigger implements INodeType {
 					const staticData = this.getWorkflowStaticData('node');
 					const webhook = (await this.helpers.httpRequestWithAuthentication.call(
 						this,
-						'imagekitApi',
+						getHookCredentialType(this),
 						{
 							method: 'POST',
 							baseURL: 'https://api.imagekit.io',
@@ -312,7 +336,7 @@ export class ImagekitTrigger implements INodeType {
 				const webhookId = staticData.webhookId as string | undefined;
 				if (webhookId) {
 					try {
-						await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', {
+						await this.helpers.httpRequestWithAuthentication.call(this, getHookCredentialType(this), {
 							method: 'DELETE',
 							baseURL: 'https://api.imagekit.io',
 							url: `/v1/accounts/webhooks/${webhookId}`,

@@ -50,6 +50,7 @@
     "n8nNodesApiVersion": 1,
     "credentials": [
       "dist/credentials/ImagekitApi.credentials.js",
+      "dist/credentials/ImagekitOAuth2Api.credentials.js",
       "dist/credentials/ImagekitWebhookApi.credentials.js"
     ],
     "nodes": [

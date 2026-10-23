@@ -5,6 +5,7 @@ import type {
 	INodeExecutionData,
 	INodeProperties,
 } from 'n8n-workflow';
+import { getCredentialType } from '../../credentialType';
 
 const showOnlyForFilePublish = {
 	operation: ['publish'],
@@ -64,7 +65,7 @@ export async function publishFile(
 
 	const responseData = await this.helpers.httpRequestWithAuthentication.call(
 		this,
-		'imagekitApi',
+		getCredentialType.call(this, i),
 		options,
 	);
 

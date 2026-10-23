@@ -8,6 +8,7 @@ import type {
 	INodeExecutionData,
 	INodeProperties,
 } from 'n8n-workflow';
+import { getCredentialType } from '../../credentialType';
 
 const showOnlyForFolder = {
 	resource: ['folder'],
@@ -216,7 +217,7 @@ export async function executeFolder(
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				'imagekitApi',
+				getCredentialType.call(this, i),
 				options,
 			);
 			return [{ json: responseData as IDataObject }];
@@ -229,7 +230,11 @@ export async function executeFolder(
 				url: '/v1/folder',
 				body: { folderPath },
 			};
-			await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			await this.helpers.httpRequestWithAuthentication.call(
+				this,
+				getCredentialType.call(this, i),
+				options,
+			);
 			return [{ json: { success: true, folderPath } as IDataObject }];
 		}
 		case 'copy': {
@@ -243,7 +248,7 @@ export async function executeFolder(
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				'imagekitApi',
+				getCredentialType.call(this, i),
 				options,
 			);
 			return [{ json: responseData as IDataObject }];
@@ -259,7 +264,7 @@ export async function executeFolder(
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				'imagekitApi',
+				getCredentialType.call(this, i),
 				options,
 			);
 			return [{ json: responseData as IDataObject }];
@@ -276,7 +281,7 @@ export async function executeFolder(
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				'imagekitApi',
+				getCredentialType.call(this, i),
 				options,
 			);
 			return [{ json: responseData as IDataObject }];
@@ -290,7 +295,7 @@ export async function executeFolder(
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				'imagekitApi',
+				getCredentialType.call(this, i),
 				options,
 			);
 			if (Array.isArray(responseData)) {

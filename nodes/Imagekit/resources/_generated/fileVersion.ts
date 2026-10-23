@@ -8,6 +8,7 @@ import type {
 	INodeExecutionData,
 	INodeProperties,
 } from 'n8n-workflow';
+import { getCredentialType } from '../../credentialType';
 
 const showOnlyForFileVersion = {
 	resource: ['fileVersion'],
@@ -155,7 +156,7 @@ export async function executeFileVersion(
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				'imagekitApi',
+				getCredentialType.call(this, i),
 				options,
 			);
 			if (Array.isArray(responseData)) {
@@ -173,7 +174,7 @@ export async function executeFileVersion(
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				'imagekitApi',
+				getCredentialType.call(this, i),
 				options,
 			);
 			if (Array.isArray(responseData)) {
@@ -189,7 +190,11 @@ export async function executeFileVersion(
 				baseURL: 'https://api.imagekit.io',
 				url: `/v1/files/${fileId}/versions/${versionId}`,
 			};
-			await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			await this.helpers.httpRequestWithAuthentication.call(
+				this,
+				getCredentialType.call(this, i),
+				options,
+			);
 			return [{ json: { success: true, fileId, versionId } as IDataObject }];
 		}
 		case 'restore': {
@@ -202,7 +207,7 @@ export async function executeFileVersion(
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				'imagekitApi',
+				getCredentialType.call(this, i),
 				options,
 			);
 			return [{ json: responseData as IDataObject }];

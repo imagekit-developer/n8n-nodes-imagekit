@@ -457,7 +457,7 @@ function emitExecuteCase(op: ResolvedOperation, baseURL: string): string {
 	// repo convention; the id field is the last path param by default, or
 	// the explicit `successEnvelope` override (used for DELETE-with-body).
 	if (op.method === 'delete') {
-		lines.push(`\t\t\tawait this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);`);
+		lines.push(`\t\t\tawait this.helpers.httpRequestWithAuthentication.call(this, getCredentialType.call(this, i), options);`);
 		// Success envelope keys: explicit override > all path-param names.
 		// Hand-written DELETEs include every identifying path param (e.g.
 		// fileVersion.delete returns { success, fileId, versionId }).
@@ -472,7 +472,7 @@ function emitExecuteCase(op: ResolvedOperation, baseURL: string): string {
 		}
 	} else {
 		lines.push(
-			`\t\t\tconst responseData = await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);`,
+			`\t\t\tconst responseData = await this.helpers.httpRequestWithAuthentication.call(this, getCredentialType.call(this, i), options);`,
 		);
 		// All GETs get an array-flatten guard. At runtime the branch only
 		// triggers when the API returns a JSON array (i.e. list/collection
@@ -522,6 +522,7 @@ function emitResourceFile(resource: string, ops: ResolvedOperation[], cfgRes: Co
 		`\tINodeExecutionData,`,
 		`\tINodeProperties,`,
 		`} from 'n8n-workflow';`,
+		`import { getCredentialType } from '../../credentialType';`,
 	].join('\n');
 	const consts = emitDisplayOptionsConsts(resource, ops);
 	const desc = emitDescription(resource, ops, cfgRes);
