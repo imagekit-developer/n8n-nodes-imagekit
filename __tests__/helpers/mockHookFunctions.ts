@@ -5,6 +5,7 @@ interface MockHookFunctionsOptions {
 	staticData?: IDataObject;
 	webhookUrl?: string;
 	apiResponses?: unknown[];
+	typeVersion?: number;
 }
 
 interface MockHookContext {
@@ -25,6 +26,7 @@ export function createMockHookFunctions(options: MockHookFunctionsOptions = {}):
 		staticData = {},
 		webhookUrl = DEFAULT_WEBHOOK_URL,
 		apiResponses = [],
+		typeVersion = 2,
 	} = options;
 
 	const http = jest.fn();
@@ -43,7 +45,14 @@ export function createMockHookFunctions(options: MockHookFunctionsOptions = {}):
 		}),
 		getNodeWebhookUrl: jest.fn(() => webhookUrl),
 		getWorkflowStaticData: jest.fn(() => staticData),
-		getNode: jest.fn(() => ({ name: 'ImageKit Trigger' })),
+		getNode: jest.fn(() => ({
+			name: 'ImageKit Trigger',
+			type: 'imagekitTrigger',
+			typeVersion,
+			id: 'n1',
+			position: [0, 0],
+			parameters: {},
+		})),
 		logger: {
 			info: jest.fn(),
 			warn: jest.fn(),
