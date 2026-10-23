@@ -37,6 +37,10 @@ export class ImagekitTrigger implements INodeType {
 		outputs: [NodeConnectionTypes.Main],
 		credentials: [
 			{
+				name: 'imagekitApi',
+				required: true,
+			},
+			{
 				name: 'imagekitWebhookApi',
 				required: false,
 				// Locally-defined HMAC sanity check; see methods.credentialTest below.
@@ -174,23 +178,75 @@ export class ImagekitTrigger implements INodeType {
 	webhookMethods = {
 		default: {
 			async checkExists(this: IHookFunctions): Promise<boolean> {
-				// ImageKit has no programmatic webhook registration API.
-				// The URL must be configured manually in the ImageKit dashboard.
-				return false;
+				const webhookUrl = this.getNodeWebhookUrl('default');
+				const staticData = this.getWorkflowStaticData('node');
+				const webhooks = (await this.helpers.httpRequestWithAuthentication.call(
+					this,
+					'imagekitApi',
+					{
+						method: 'GET',
+						baseURL: 'https://api.imagekit.io',
+						url: '/v1/accounts/webhooks',
+					},
+				)) as IDataObject[];
+				// Match by URL (not stored id) so manually-registered webhooks are
+				// adopted and re-activation still works if static data was lost.
+				const existing = webhooks.find((w) => w.endpoint === webhookUrl);
+				if (!existing) {
+					delete staticData.webhookId;
+					delete staticData.secret;
+					return false;
+				}
+				if (existing.enabled === false) {
+					await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', {
+						method: 'PATCH',
+						baseURL: 'https://api.imagekit.io',
+						url: `/v1/accounts/webhooks/${existing.id}`,
+						body: { enabled: true },
+					});
+				}
+				staticData.webhookId = existing.id;
+				staticData.secret = existing.secret;
+				return true;
 			},
 			async create(this: IHookFunctions): Promise<boolean> {
-				// No API to call — the user copies the webhook URL shown in n8n
-				// and pastes it into the ImageKit dashboard under Settings > Webhooks.
-				// Surface a hint in the execution log so the requirement is discoverable
-				// at activation time, not just buried in the README.
 				const webhookUrl = this.getNodeWebhookUrl('default');
-				this.logger.info(
-					`[ImagekitTrigger] No public webhook registration API. Add this URL in the ImageKit dashboard (Settings > Webhooks): ${webhookUrl}`,
-				);
+				const events = this.getNodeParameter('events') as string[];
+				const staticData = this.getWorkflowStaticData('node');
+				const webhook = (await this.helpers.httpRequestWithAuthentication.call(
+					this,
+					'imagekitApi',
+					{
+						method: 'POST',
+						baseURL: 'https://api.imagekit.io',
+						url: '/v1/accounts/webhooks',
+						body: { endpoint: webhookUrl, events, enabled: true },
+					},
+				)) as IDataObject;
+				staticData.webhookId = webhook.id;
+				staticData.secret = webhook.secret;
 				return true;
 			},
 			async delete(this: IHookFunctions): Promise<boolean> {
-				// No API to call — the user removes the URL from the ImageKit dashboard manually.
+				const staticData = this.getWorkflowStaticData('node');
+				const webhookId = staticData.webhookId as string | undefined;
+				if (webhookId) {
+					try {
+						await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', {
+							method: 'DELETE',
+							baseURL: 'https://api.imagekit.io',
+							url: `/v1/accounts/webhooks/${webhookId}`,
+						});
+					} catch (error) {
+						// A failed delete (already removed in the dashboard, network
+						// blip) must not block deactivation.
+						this.logger.warn(
+							`[ImagekitTrigger] Failed to delete ImageKit webhook ${webhookId}: ${(error as Error).message}`,
+						);
+					}
+				}
+				delete staticData.webhookId;
+				delete staticData.secret;
 				return true;
 			},
 		},
