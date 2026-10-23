@@ -31,7 +31,7 @@ export class ImagekitWebhookApi implements ICredentialType {
 				password: true,
 			},
 			description:
-				'The signing secret shown when you create a webhook endpoint in the ImageKit dashboard. Starts with "whsec_". Used to verify the x-ik-signature header on every delivery.',
+				'Only needed if you registered the webhook manually in the ImageKit dashboard. The signing secret shown when you create a webhook endpoint in the ImageKit dashboard. Starts with "whsec_". Used to verify the x-ik-signature header on every delivery.',
 		},
 	];
 }

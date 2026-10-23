@@ -152,7 +152,7 @@ export class ImagekitTrigger implements INodeType {
 				type: 'boolean',
 				default: true,
 				description:
-					'Whether to validate the x-ik-signature header against the webhook signing secret stored in the ImageKit Webhook credential. Strongly recommended; disable only for local debugging.',
+					'Whether to validate the x-ik-signature header. The signing secret is fetched automatically when the webhook is registered on activation; an ImageKit Webhook credential is only needed if you registered the webhook manually in the dashboard.',
 			},
 			{
 				displayName:

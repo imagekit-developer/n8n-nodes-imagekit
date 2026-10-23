@@ -63,7 +63,7 @@ To use this node, create ImageKit API credentials in n8n.
 4. In n8n, create credentials of type **ImageKit API**.
 5. Paste the private key and save the credentials.
 
-For webhook triggers, configure credentials of type **ImageKit Webhook API** with the webhook secret used to verify incoming ImageKit webhook payloads.
+For webhook triggers, only the **ImageKit API** credential is required: the **ImageKit Trigger** node registers its webhook with ImageKit automatically when the workflow is activated and removes it on deactivation. If you change the **Events** parameter, de-activate and re-activate the workflow so the subscription is recreated. The **ImageKit Webhook API** credential is optional and only needed if you registered the webhook manually in the ImageKit dashboard.
 
 **Security note:** Your ImageKit private key can perform privileged account operations. Store it only in n8n credentials and never expose it in workflow data, logs, frontend code, or shared screenshots.
 
