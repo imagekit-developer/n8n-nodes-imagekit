@@ -5,6 +5,7 @@ import type {
 	INodeExecutionData,
 	INodeProperties,
 } from 'n8n-workflow';
+import { getCredentialType } from '../../credentialType';
 
 const showOnlyForFileUpdate = {
 	operation: ['update'],
@@ -102,7 +103,7 @@ export async function updateFile(
 
 	const responseData = await this.helpers.httpRequestWithAuthentication.call(
 		this,
-		'imagekitApi',
+		getCredentialType.call(this, i),
 		options,
 	);
 

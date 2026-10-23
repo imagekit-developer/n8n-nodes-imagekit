@@ -5,6 +5,7 @@ import type {
 	INodeExecutionData,
 	INodeProperties,
 } from 'n8n-workflow';
+import { getCredentialType } from '../../credentialType';
 
 const showOnlyForFileUpload = {
 	operation: ['upload'],
@@ -257,7 +258,7 @@ export async function uploadFile(
 
 	const responseData = await this.helpers.httpRequestWithAuthentication.call(
 		this,
-		'imagekitApi',
+		getCredentialType.call(this, i),
 		options,
 	);
 

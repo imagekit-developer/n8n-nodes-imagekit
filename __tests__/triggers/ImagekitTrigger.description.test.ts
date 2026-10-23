@@ -27,5 +27,21 @@ describe('ImagekitTrigger description', () => {
 		const imagekitApi = description.credentials?.find((c) => c.name === 'imagekitApi');
 		expect(imagekitApi?.required).toBe(true);
 		expect(imagekitApi?.displayOptions?.show?.autoWebhookSetup).toEqual([true]);
+		expect(imagekitApi?.displayOptions?.show?.authentication).toEqual(['apiKey']);
+	});
+
+	it('offers the OAuth2 credential under the same autoWebhookSetup gate', () => {
+		const imagekitOAuth2Api = description.credentials?.find(
+			(c) => c.name === 'imagekitOAuth2Api',
+		);
+		expect(imagekitOAuth2Api?.required).toBe(true);
+		expect(imagekitOAuth2Api?.displayOptions?.show?.autoWebhookSetup).toEqual([true]);
+		expect(imagekitOAuth2Api?.displayOptions?.show?.authentication).toEqual(['oAuth2']);
+	});
+
+	it('shows the authentication picker only when autoWebhookSetup is on', () => {
+		const authentication = description.properties.find((p) => p.name === 'authentication');
+		expect(authentication?.default).toBe('apiKey');
+		expect(authentication?.displayOptions?.show?.autoWebhookSetup).toEqual([true]);
 	});
 });

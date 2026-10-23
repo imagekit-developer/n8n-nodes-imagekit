@@ -63,6 +63,14 @@ To use this node, create ImageKit API credentials in n8n.
 4. In n8n, create credentials of type **ImageKit API**.
 5. Paste the private key and save the credentials.
 
+### OAuth2 (Dynamic Client Registration)
+
+Instead of an API key, you can connect with OAuth2. This requires n8n 1.117 or later, which supports Dynamic Client Registration.
+
+1. On the **ImageKit** or **ImageKit Trigger** node, set **Authentication** to **OAuth2**.
+2. Create credentials of type **ImageKit OAuth2 API**.
+3. Click **Connect** — n8n registers itself with ImageKit automatically and completes the OAuth flow. No client ID or client secret is needed.
+
 The **ImageKit Trigger** node has an **Automatic Webhook Setup** toggle, which is on by default for new triggers.
 
 With the toggle on, the node only needs the **ImageKit API** credential. When you activate the workflow, the node creates the webhook in ImageKit, and when you deactivate it, the node deletes the webhook. The API key must have webhook access. Standard keys do not, so use a [restricted API key](https://imagekit.io/docs/api-keys) with webhook access. If activation fails with HTTP 403, the key does not have this access: use a restricted key, or turn the toggle off. On activation the node adopts any existing webhook that points at the trigger URL, updates its events to match the **Events** parameter, and re-enables it if it was disabled in the dashboard. In automatic mode the webhook signing secret is kept in the workflow's static data, which n8n stores unencrypted in its database (unlike credentials).

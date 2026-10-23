@@ -8,6 +8,7 @@ import type {
 	INodeExecutionData,
 	INodeProperties,
 } from 'n8n-workflow';
+import { getCredentialType } from '../../credentialType';
 
 const showOnlyForPurgeCache = {
 	resource: ['purgeCache'],
@@ -87,7 +88,7 @@ export async function executePurgeCache(
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				'imagekitApi',
+				getCredentialType.call(this, i),
 				options,
 			);
 			return [{ json: responseData as IDataObject }];
@@ -101,7 +102,7 @@ export async function executePurgeCache(
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				'imagekitApi',
+				getCredentialType.call(this, i),
 				options,
 			);
 			if (Array.isArray(responseData)) {

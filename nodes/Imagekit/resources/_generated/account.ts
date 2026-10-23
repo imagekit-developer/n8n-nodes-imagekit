@@ -8,6 +8,7 @@ import type {
 	INodeExecutionData,
 	INodeProperties,
 } from 'n8n-workflow';
+import { getCredentialType } from '../../credentialType';
 
 const showOnlyForAccount = {
 	resource: ['account'],
@@ -113,7 +114,7 @@ export async function executeAccount(
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				'imagekitApi',
+				getCredentialType.call(this, i),
 				options,
 			);
 			if (Array.isArray(responseData)) {
@@ -132,7 +133,7 @@ export async function executeAccount(
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				'imagekitApi',
+				getCredentialType.call(this, i),
 				options,
 			);
 			if (Array.isArray(responseData)) {

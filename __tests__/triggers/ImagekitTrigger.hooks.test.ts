@@ -172,6 +172,21 @@ describe('ImagekitTrigger webhookMethods', () => {
 			await expect(call).rejects.toThrow(/Automatic Webhook Setup/);
 			await expect(call).rejects.toBeInstanceOf(NodeOperationError);
 		});
+
+		it('uses the OAuth2 credential when authentication is oAuth2', async () => {
+			const { context, http } = createMockHookFunctions({
+				nodeParameters: { authentication: 'oAuth2', events: ['file.created'] },
+				apiResponses: [{ id: 'wh_3', secret: 'whsec_3' }],
+			});
+
+			const result = await hooks().create.call(context);
+
+			expect(result).toBe(true);
+			expect(http).toHaveBeenCalledWith(
+				'imagekitOAuth2Api',
+				expect.objectContaining({ method: 'POST', url: '/v1/accounts/webhooks' }),
+			);
+		});
 	});
 
 	describe('delete', () => {

@@ -8,6 +8,7 @@ import type {
 	INodeExecutionData,
 	INodeProperties,
 } from 'n8n-workflow';
+import { getCredentialType } from '../../credentialType';
 
 const showOnlyForAccountOrigin = {
 	resource: ['accountOrigin'],
@@ -142,7 +143,7 @@ export async function executeAccountOrigin(
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				'imagekitApi',
+				getCredentialType.call(this, i),
 				options,
 			);
 			if (Array.isArray(responseData)) {
@@ -160,7 +161,7 @@ export async function executeAccountOrigin(
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				'imagekitApi',
+				getCredentialType.call(this, i),
 				options,
 			);
 			return [{ json: responseData as IDataObject }];
@@ -174,7 +175,7 @@ export async function executeAccountOrigin(
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				'imagekitApi',
+				getCredentialType.call(this, i),
 				options,
 			);
 			if (Array.isArray(responseData)) {
@@ -193,7 +194,7 @@ export async function executeAccountOrigin(
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,
-				'imagekitApi',
+				getCredentialType.call(this, i),
 				options,
 			);
 			return [{ json: responseData as IDataObject }];
@@ -205,7 +206,11 @@ export async function executeAccountOrigin(
 				baseURL: 'https://api.imagekit.io',
 				url: `/v1/accounts/origins/${originId}`,
 			};
-			await this.helpers.httpRequestWithAuthentication.call(this, 'imagekitApi', options);
+			await this.helpers.httpRequestWithAuthentication.call(
+				this,
+				getCredentialType.call(this, i),
+				options,
+			);
 			return [{ json: { success: true, originId } as IDataObject }];
 		}
 		default:

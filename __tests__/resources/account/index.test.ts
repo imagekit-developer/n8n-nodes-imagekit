@@ -56,6 +56,28 @@ describe('executeAccount', () => {
 		});
 	});
 
+	describe('authentication', () => {
+		it('uses the OAuth2 credential when authentication is oAuth2', async () => {
+			const mockResponse = { bandwidth: 1024 };
+			const context = createMockExecuteFunctions({
+				nodeParameters: {
+					authentication: 'oAuth2',
+					operation: 'getUsage',
+					startDate: '2025-01-01',
+					endDate: '2025-01-31',
+				},
+				httpResponse: mockResponse,
+			});
+
+			await executeAccount.call(context, 0);
+
+			expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
+				'imagekitOAuth2Api',
+				expect.objectContaining({ method: 'GET', url: '/v1/accounts/usage' }),
+			);
+		});
+	});
+
 	describe('unsupported operation', () => {
 		it('should throw for unsupported operations', async () => {
 			const context = createMockExecuteFunctions({
