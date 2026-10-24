@@ -9,8 +9,9 @@ import type {
 	INodeTypeDescription,
 	IWebhookFunctions,
 	IWebhookResponseData,
+	JsonObject,
 } from 'n8n-workflow';
-import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
+import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { createHmac } from 'crypto';
 import { verifyImagekitSignature } from './verifySignature';
 
@@ -46,7 +47,7 @@ export class ImagekitTrigger implements INodeType {
 			'Triggers on ImageKit webhook events (file and folder lifecycle, transformations, video processing).',
 		eventTriggerDescription: 'Waiting for an ImageKit webhook delivery',
 		defaults: { name: 'ImageKit Trigger' },
-		usableAsTool: true,
+		usableAsTool: undefined,
 		inputs: [],
 		outputs: [NodeConnectionTypes.Main],
 		credentials: [
@@ -274,7 +275,7 @@ export class ImagekitTrigger implements INodeType {
 								'Webhook registration needs the "Webhooks" permission on the ImageKit private key.',
 						});
 					}
-					throw error;
+					throw new NodeApiError(this.getNode(), error as JsonObject);
 				}
 			},
 			async create(this: IHookFunctions): Promise<boolean> {
@@ -303,7 +304,7 @@ export class ImagekitTrigger implements INodeType {
 								'Webhook registration needs the "Webhooks" permission on the ImageKit private key.',
 						});
 					}
-					throw error;
+					throw new NodeApiError(this.getNode(), error as JsonObject);
 				}
 			},
 			async delete(this: IHookFunctions): Promise<boolean> {

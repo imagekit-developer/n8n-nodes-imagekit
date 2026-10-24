@@ -1,4 +1,4 @@
-import { NodeOperationError } from 'n8n-workflow';
+import { NodeApiError, NodeOperationError } from 'n8n-workflow';
 import { ImagekitTrigger } from '../../nodes/Imagekit/ImagekitTrigger.node';
 import { createMockHookFunctions } from '../helpers/mockHookFunctions';
 
@@ -61,12 +61,24 @@ describe('ImagekitTrigger webhookMethods', () => {
 			await expect(call).rejects.toBeInstanceOf(NodeOperationError);
 		});
 
-		it('rethrows non-403 errors unchanged', async () => {
+		it('wraps non-403 errors in NodeApiError', async () => {
 			const { context } = createMockHookFunctions({
 				apiResponses: [Object.assign(new Error('boom'), { httpCode: '500' })],
 			});
 
-			await expect(hooks().checkExists.call(context)).rejects.toThrow('boom');
+			const call = hooks().checkExists.call(context);
+			await expect(call).rejects.toBeInstanceOf(NodeApiError);
+			const error = await call.catch((e) => e);
+			expect(error.description).toContain('boom');
+		});
+
+		it('rethrows an incoming NodeApiError as the identical object', async () => {
+			const { context } = createMockHookFunctions();
+			const theError = new NodeApiError(context.getNode(), { message: 'boom', httpCode: '500' });
+			const http = context.helpers.httpRequestWithAuthentication as jest.Mock;
+			http.mockRejectedValueOnce(theError);
+
+			await expect(hooks().checkExists.call(context)).rejects.toBe(theError);
 		});
 
 		it('re-enables a disabled matching webhook', async () => {
@@ -171,6 +183,17 @@ describe('ImagekitTrigger webhookMethods', () => {
 			const call = hooks().create.call(context);
 			await expect(call).rejects.toThrow(/Automatic Webhook Setup/);
 			await expect(call).rejects.toBeInstanceOf(NodeOperationError);
+		});
+
+		it('wraps non-403 errors in NodeApiError', async () => {
+			const { context } = createMockHookFunctions({
+				apiResponses: [Object.assign(new Error('boom'), { httpCode: '500' })],
+			});
+
+			const call = hooks().create.call(context);
+			await expect(call).rejects.toBeInstanceOf(NodeApiError);
+			const error = await call.catch((e) => e);
+			expect(error.description).toContain('boom');
 		});
 	});
 
