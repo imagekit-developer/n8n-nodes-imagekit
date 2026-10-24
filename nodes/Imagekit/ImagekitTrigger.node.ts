@@ -27,7 +27,7 @@ export class ImagekitTrigger implements INodeType {
 		version: 1,
 		subtitle: '={{$parameter["events"].join(", ")}}',
 		description:
-			'Triggers on ImageKit webhook events (file lifecycle, transformations, video processing).',
+			'Triggers on ImageKit webhook events (file and folder lifecycle, transformations, video processing).',
 		eventTriggerDescription: 'Waiting for an ImageKit webhook delivery',
 		defaults: { name: 'ImageKit Trigger' },
 		// Surfaces the trigger as an AI tool so agents can subscribe to ImageKit
@@ -66,6 +66,9 @@ export class ImagekitTrigger implements INodeType {
 					'file.deleted',
 					'file-version.created',
 					'file-version.deleted',
+					'folder.created',
+					'folder.updated',
+					'folder.deleted',
 					'upload.pre-transform.success',
 					'upload.pre-transform.error',
 					'upload.post-transform.success',
@@ -96,6 +99,18 @@ export class ImagekitTrigger implements INodeType {
 					{
 						name: 'File Version Deleted',
 						value: 'file-version.deleted',
+					},
+					{
+						name: 'Folder Created',
+						value: 'folder.created',
+					},
+					{
+						name: 'Folder Deleted',
+						value: 'folder.deleted',
+					},
+					{
+						name: 'Folder Updated',
+						value: 'folder.updated',
 					},
 					{
 						name: 'Post-Transformation Error',

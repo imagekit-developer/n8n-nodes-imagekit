@@ -7,5 +7,7 @@ export * from './folder';
 export * from './metadata';
 export * from './purgeCache';
 export * from './savedExtension';
+export * from './namedTransformation';
+export * from './webhook';
 export * from './customMetadataFields';
 export * from './file';

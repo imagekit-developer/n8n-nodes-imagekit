@@ -21,6 +21,8 @@ import { accountDescription, executeAccount } from './resources/_generated/accou
 import { accountOriginDescription, executeAccountOrigin } from './resources/_generated/accountOrigin';
 import { accountUrlEndpointDescription, executeAccountUrlEndpoint } from './resources/_generated/accountUrlEndpoint';
 import { savedExtensionDescription, executeSavedExtension } from './resources/_generated/savedExtension';
+import { namedTransformationDescription, executeNamedTransformation } from './resources/_generated/namedTransformation';
+import { webhookDescription, executeWebhook } from './resources/_generated/webhook';
 
 export class Imagekit implements INodeType {
 	description: INodeTypeDescription = {
@@ -82,12 +84,20 @@ export class Imagekit implements INodeType {
 						value: 'metadata',
 					},
 					{
+						name: 'Named Transformation',
+						value: 'namedTransformation',
+					},
+					{
 						name: 'Purge Cache',
 						value: 'purgeCache',
 					},
 					{
 						name: 'Saved Extension',
 						value: 'savedExtension',
+					},
+					{
+						name: 'Webhook',
+						value: 'webhook',
 					},
 				],
 				default: 'asset',
@@ -103,6 +113,8 @@ export class Imagekit implements INodeType {
 			...accountOriginDescription,
 			...accountUrlEndpointDescription,
 			...savedExtensionDescription,
+			...namedTransformationDescription,
+			...webhookDescription,
 		],
 	};
 
@@ -167,6 +179,16 @@ export class Imagekit implements INodeType {
 					}
 					case 'savedExtension': {
 						const executionItems = await executeSavedExtension.call(this, i);
+						returnData.push(...executionItems);
+						break;
+					}
+					case 'namedTransformation': {
+						const executionItems = await executeNamedTransformation.call(this, i);
+						returnData.push(...executionItems);
+						break;
+					}
+					case 'webhook': {
+						const executionItems = await executeWebhook.call(this, i);
 						returnData.push(...executionItems);
 						break;
 					}

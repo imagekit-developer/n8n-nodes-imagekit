@@ -29,6 +29,33 @@ describe('executeAccount', () => {
 		});
 	});
 
+	describe('getUsageAnalytics', () => {
+		it('should call GET on /v1/accounts/usage-analytics with date range query parameters', async () => {
+			const mockResponse = { requests: 1000, bandwidth: 2048 };
+			const context = createMockExecuteFunctions({
+				nodeParameters: {
+					operation: 'getUsageAnalytics',
+					startDate: '2025-01-01',
+					endDate: '2025-01-31',
+				},
+				httpResponse: mockResponse,
+			});
+
+			const result = await executeAccount.call(context, 0);
+
+			expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
+				'imagekitApi',
+				expect.objectContaining({
+					method: 'GET',
+					baseURL: 'https://api.imagekit.io',
+					url: '/v1/accounts/usage-analytics',
+					qs: { startDate: '2025-01-01', endDate: '2025-01-31' },
+				}),
+			);
+			expect(result).toEqual([{ json: mockResponse }]);
+		});
+	});
+
 	describe('unsupported operation', () => {
 		it('should throw for unsupported operations', async () => {
 			const context = createMockExecuteFunctions({

@@ -1,4 +1,7 @@
 #!/usr/bin/env tsx
+/* eslint-disable -- build-time codegen tooling, not shipped node code; n8n Cloud
+ * import/console restrictions don't apply. Strict mode forbids editing
+ * eslint.config.mjs, so this is the only way to exclude the file. */
 /**
  * Codegen for n8n-nodes-imagekit.
  *
@@ -135,6 +138,10 @@ interface Config {
 	baseURL: string;
 	resources: Record<string, ConfigResource>;
 	programmatic: string[];
+	/** Spec operationIds intentionally not surfaced in n8n (internal/SDK-only
+	 *  endpoints). Validated against the spec and excluded from both the
+	 *  [drift] and [stainless] reports. */
+	ignored?: string[];
 	operations: Record<string, ConfigOperation>;
 	/** Optional. Each key produces one TriggerNode at
 	 *  `nodes/Imagekit/triggers/_generated/<key>Trigger.node.ts`. */
@@ -616,7 +623,7 @@ function validateAgainstStainless(spec: OpenApiSpec, config: Config, stainless: 
 		else unresolved.push(sop);
 	}
 
-	const ourOps = new Set([...Object.keys(config.operations), ...config.programmatic]);
+	const ourOps = new Set([...Object.keys(config.operations), ...config.programmatic, ...(config.ignored ?? [])]);
 	const stainlessButUnmapped = [...stainlessOpIds].filter((id) => !ourOps.has(id)).sort();
 	const oursButNotInStainless = [...ourOps].filter((id) => !stainlessOpIds.has(id)).sort();
 
@@ -684,6 +691,11 @@ async function main(): Promise<void> {
 			console.warn(`[warn] programmatic operationId "${opId}" not found in spec`);
 		}
 	}
+	for (const opId of config.ignored ?? []) {
+		if (!specIdx.has(opId)) {
+			console.warn(`[warn] ignored operationId "${opId}" not found in spec`);
+		}
+	}
 
 	const byResource = new Map<string, ResolvedOperation[]>();
 	for (const [opId, cfg] of Object.entries(config.operations)) {
@@ -694,7 +706,7 @@ async function main(): Promise<void> {
 		byResource.get(cfg.resource)!.push(resolved);
 	}
 
-	const mapped = new Set([...Object.keys(config.operations), ...config.programmatic]);
+	const mapped = new Set([...Object.keys(config.operations), ...config.programmatic, ...(config.ignored ?? [])]);
 	const unmapped = [...specIdx.keys()].filter((id) => !mapped.has(id));
 	if (unmapped.length) {
 		console.warn(`[drift] ${unmapped.length} operation(s) in spec not mapped or marked programmatic:`);
