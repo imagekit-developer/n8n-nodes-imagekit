@@ -71,7 +71,7 @@ describe('ImagekitTrigger', () => {
 		const header = sign(NOW, otherRaw);
 		const { context } = createMockWebhookFunctions({
 			nodeParameters: {
-				events: ['file.created'], // only "created" is selected
+				events: ['file.created'],
 				verifySignature: true,
 				toleranceSeconds: 300,
 			},
@@ -154,5 +154,136 @@ describe('ImagekitTrigger', () => {
 			error: 'invalid-signature',
 			reason: 'timestamp-outside-tolerance',
 		});
+	});
+
+	it('verifies with the static-data secret when no credential is set', async () => {
+		const trigger = new ImagekitTrigger();
+		const header = sign(NOW, fileCreatedRaw, 'whsec_auto');
+		const { context } = createMockWebhookFunctions({
+			nodeParameters: {
+				events: ['file.created'],
+				verifySignature: true,
+				toleranceSeconds: 300,
+			},
+			headers: { 'x-ik-signature': header },
+			body: fileCreated,
+			rawBody: fileCreatedRaw,
+			staticData: { secret: 'whsec_auto' },
+			credentials: new Error('Node does not have any credentials set'),
+		});
+
+		const result = await trigger.webhook!.call(context);
+
+		expect(result).toEqual({ workflowData: [[{ json: fileCreated }]] });
+		expect(context.getCredentials).not.toHaveBeenCalled();
+	});
+
+	it('manual mode verifies with the credential even when static data holds a stale secret', async () => {
+		const trigger = new ImagekitTrigger();
+		const header = sign(NOW, fileCreatedRaw);
+		const { context } = createMockWebhookFunctions({
+			nodeParameters: {
+				autoWebhookSetup: false,
+				events: ['file.created'],
+				verifySignature: true,
+				toleranceSeconds: 300,
+			},
+			headers: { 'x-ik-signature': header },
+			body: fileCreated,
+			rawBody: fileCreatedRaw,
+			staticData: { secret: 'whsec_stale' },
+			credentials: { secret: SECRET },
+		});
+
+		const result = await trigger.webhook!.call(context);
+
+		expect(result).toEqual({ workflowData: [[{ json: fileCreated }]] });
+	});
+
+	it('manual mode returns 401 no-secret when only static data has a secret', async () => {
+		const trigger = new ImagekitTrigger();
+		const header = sign(NOW, fileCreatedRaw, 'whsec_stale');
+		const { context, response } = createMockWebhookFunctions({
+			nodeParameters: {
+				autoWebhookSetup: false,
+				events: ['file.created'],
+				verifySignature: true,
+				toleranceSeconds: 300,
+			},
+			headers: { 'x-ik-signature': header },
+			body: fileCreated,
+			rawBody: fileCreatedRaw,
+			staticData: { secret: 'whsec_stale' },
+			credentials: new Error('Node does not have any credentials set'),
+		});
+
+		const result = await trigger.webhook!.call(context);
+
+		expect(result).toEqual({ noWebhookResponse: true });
+		expect(response.statusCode).toBe(401);
+		expect(response.body).toEqual({ error: 'invalid-signature', reason: 'no-secret' });
+	});
+
+	it('falls back to the credential secret when static data is empty', async () => {
+		const trigger = new ImagekitTrigger();
+		const header = sign(NOW, fileCreatedRaw);
+		const { context } = createMockWebhookFunctions({
+			nodeParameters: {
+				events: ['file.created'],
+				verifySignature: true,
+				toleranceSeconds: 300,
+			},
+			headers: { 'x-ik-signature': header },
+			body: fileCreated,
+			rawBody: fileCreatedRaw,
+			staticData: {},
+			credentials: { secret: SECRET },
+		});
+
+		const result = await trigger.webhook!.call(context);
+
+		expect(result).toEqual({ workflowData: [[{ json: fileCreated }]] });
+	});
+
+	it('returns 401 no-secret when neither source has a secret', async () => {
+		const trigger = new ImagekitTrigger();
+		const { context, response } = createMockWebhookFunctions({
+			nodeParameters: {
+				events: ['file.created'],
+				verifySignature: true,
+				toleranceSeconds: 300,
+			},
+			headers: { 'x-ik-signature': `t=${NOW},v1=deadbeef` },
+			body: fileCreated,
+			rawBody: fileCreatedRaw,
+			staticData: {},
+			credentials: {},
+		});
+
+		const result = await trigger.webhook!.call(context);
+
+		expect(result).toEqual({ noWebhookResponse: true });
+		expect(response.statusCode).toBe(401);
+		expect(response.body).toEqual({ error: 'invalid-signature', reason: 'no-secret' });
+	});
+
+	it('skips secret lookup when verification is off', async () => {
+		const trigger = new ImagekitTrigger();
+		const { context } = createMockWebhookFunctions({
+			nodeParameters: {
+				events: ['file.created'],
+				verifySignature: false,
+				toleranceSeconds: 300,
+			},
+			headers: {},
+			body: fileCreated,
+			rawBody: fileCreatedRaw,
+			credentials: new Error('boom'),
+		});
+
+		const result = await trigger.webhook!.call(context);
+
+		expect(result).toEqual({ workflowData: [[{ json: fileCreated }]] });
+		expect(context.getCredentials).not.toHaveBeenCalled();
 	});
 });

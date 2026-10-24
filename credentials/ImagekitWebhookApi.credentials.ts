@@ -1,13 +1,5 @@
 import type { Icon, ICredentialType, INodeProperties } from 'n8n-workflow';
 
-/**
- * Holds the shared signing secret used by the generated trigger nodes to
- * verify the `x-ik-signature` header on incoming webhook deliveries.
- *
- * This is intentionally separate from `ImagekitApi` (the private/public-key
- * credential used for outbound REST calls): webhook secrets are issued
- * per-endpoint in the ImageKit dashboard and live a different lifecycle.
- */
 export class ImagekitWebhookApi implements ICredentialType {
 	name = 'imagekitWebhookApi';
 
@@ -31,7 +23,7 @@ export class ImagekitWebhookApi implements ICredentialType {
 				password: true,
 			},
 			description:
-				'The signing secret shown when you create a webhook endpoint in the ImageKit dashboard. Starts with "whsec_". Used to verify the x-ik-signature header on every delivery.',
+				'Only needed if you registered the webhook manually in the ImageKit dashboard. The signing secret shown when you create a webhook endpoint in the ImageKit dashboard. Starts with "whsec_". Used to verify the x-ik-signature header on every delivery.',
 		},
 	];
 }

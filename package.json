@@ -43,7 +43,9 @@
     "generate:check": "tsx scripts/generate.ts && git diff --exit-code -- nodes/Imagekit/resources/_generated openapi/config.json",
     "prepare-dev": "husky"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
@@ -73,6 +75,10 @@
     "tsx": "^4.21.0",
     "typescript": "5.9.2"
   },
-  "peerDependencies": { "n8n-workflow": "*" },
-  "publishConfig": { "access": "public" }
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }
