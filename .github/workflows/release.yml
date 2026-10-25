@@ -2,7 +2,14 @@
 # publishes to npm — all from a single manual trigger.
 #
 # ─── USAGE ────────────────────────────────────────────────────────────────────
-#   Actions → Release → Run workflow → pick patch / minor / major
+#   Actions → Release → Run workflow. With bump = auto (default) the bump is
+#   inferred from conventional commits since the last tag (fix → patch,
+#   feat → minor, BREAKING CHANGE / "!" → major); pick patch / minor / major
+#   to override it.
+#   Tick "beta" for a pre-release (e.g. 1.1.0-beta.0, published under the
+#   npm `beta` dist-tag). Re-run with "beta" for beta.1, beta.2, …; a feat
+#   or breaking change landing mid-beta moves the line up (1.0.7-beta.x →
+#   1.1.0-beta.0). Run without "beta" to graduate to the stable version.
 
 name: Release
 
@@ -11,10 +18,13 @@ on:
     inputs:
       bump:
         description: Version bump
-        required: true
-        default: patch
+        default: auto
         type: choice
-        options: [patch, minor, major]
+        options: [auto, patch, minor, major]
+      beta:
+        description: Beta pre-release
+        type: boolean
+        default: false
 
 jobs:
   release:
@@ -46,7 +56,7 @@ jobs:
           git config user.name "github-actions[bot]"
 
       - name: Bump version, update changelog, create GitHub Release
-        run: npx release-it ${{ inputs.bump }} --ci
+        run: npx release-it --ci ${{ inputs.bump != 'auto' && inputs.bump || '' }} ${{ inputs.beta && '--preRelease=beta' || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -56,3 +66,4 @@ jobs:
           npm run release
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_TAG: ${{ inputs.beta && 'beta' || 'latest' }}
