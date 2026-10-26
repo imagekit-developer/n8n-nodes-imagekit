@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0-beta.0](https://github.com/imagekit-developer/n8n-nodes-imagekit/compare/1.0.6...1.1.0-beta.0) (2026-10-26)
+
+### Features
+
+* add named transformation, webhook and usage analytics ops; folder trigger events ([#2](https://github.com/imagekit-developer/n8n-nodes-imagekit/issues/2)) ([75490b3](https://github.com/imagekit-developer/n8n-nodes-imagekit/commit/75490b3b2c8d16ca511f0c319cbffee75a7a70e7))
+* **trigger:** register ImageKit webhook on activation ([#3](https://github.com/imagekit-developer/n8n-nodes-imagekit/issues/3)) ([4b1b7a1](https://github.com/imagekit-developer/n8n-nodes-imagekit/commit/4b1b7a1d76ba80cf6c75b51f0d1a3fca7eea64d6))
+
 ## [1.0.6](https://github.com/imagekit-developer/n8n-nodes-imagekit/compare/1.0.5...1.0.6) (2026-05-25)
 
 ## [1.0.5](https://github.com/imagekit-developer/n8n-nodes-imagekit/compare/1.0.4...1.0.5) (2026-05-19)
