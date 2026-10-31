@@ -4099,6 +4099,101 @@ paths:
         "403": *a2
         "429": *a3
 
+  /v1/accounts/contract:
+    get:
+      tags:
+        - Account Management API
+      operationId: get-contract
+      summary: Get contract consumption
+      description: |
+        Get the account's contract terms and the usage consumed against them in the current contract term. Bandwidth is in bytes; video processing units, extension units and purge cache requests are counts.
+
+        For an agency account, consumption includes the child accounts billed to it. A child account billed to its parent cannot call this endpoint; call it with the parent account's credentials instead.
+
+        Contract terms are read live; consumption is refreshed periodically, not on every request. Use `asOf` to check how fresh it is. Contracts of one month or less are reported as `hasContract: false`. The response is cached for 5 minutes per account.
+
+        Requires an API key with account management access.
+      responses:
+        "200":
+          description: Contract terms and consumption.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - hasContract
+                properties:
+                  hasContract:
+                    type: boolean
+                    description: Whether the account has an active contract. The other fields are present only when it does.
+                  contractMonths:
+                    type: integer
+                    description: Length of each contract term in months.
+                  originalContractStartDate:
+                    type: string
+                    format: date
+                    description: Start date of the first contract term.
+                  effectiveContractStartDate:
+                    type: string
+                    format: date
+                    description: Start date of the current contract term. It moves forward when the contract renews.
+                  effectiveContractEndDate:
+                    type: string
+                    format: date
+                    description: End date of the current contract term.
+                  quota:
+                    $ref: "#/components/schemas/ContractUnits"
+                    description: Usage included in the current contract term.
+                  consumed:
+                    $ref: "#/components/schemas/ContractUnits"
+                    description: Usage consumed in the current contract term. For an agency account, this includes the child accounts billed to it.
+                  asOf:
+                    type: [string, null]
+                    format: date-time
+                    description: When `consumed` was last computed. `null` if it has not been computed for the contract yet; `consumed` is then all zeros.
+              examples:
+                default:
+                  value:
+                    hasContract: true
+                    contractMonths: 12
+                    originalContractStartDate: "2025-04-01"
+                    effectiveContractStartDate: "2026-04-01"
+                    effectiveContractEndDate: "2027-03-31"
+                    quota:
+                      bandwidthBytes: 536870912000000
+                      videoProcessingUnitsCount: 2000000
+                      extensionUnitsCount: 100000
+                      purgeCacheRequests: 0
+                    consumed:
+                      bandwidthBytes: 229190589617275
+                      videoProcessingUnitsCount: 812004
+                      extensionUnitsCount: 40211
+                      purgeCacheRequests: 0
+                    asOf: "2026-10-27T09:00:00.000Z"
+                noContract:
+                  value:
+                    hasContract: false
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    examples:
+                      - Your account cannot be authenticated.
+                      - Your request contains expired private API key.
+                      - Your account is disabled.
+                      - This account is billed to its parent account. Contract details are available on the parent account.
+                  help:
+                    type: string
+                    example: For support kindly contact us at support@imagekit.io.
   /v1/named-transformations:
     get:
       summary: List named transformations
@@ -5592,6 +5687,14 @@ components:
                   example: true
                   default: false
                   type: boolean
+                useImprovedLayerSpec:
+                  description:
+                    Whether to always rewrite Cloudinary layers to the improved ImageKit
+                    layer specification (`l-image`, `l-text`, ..., `l-end`). When `false`
+                    or omitted, the improved specification is used only for transformations
+                    that require it.
+                  example: true
+                  type: boolean
               required:
                 - type
               additionalProperties: false
@@ -5670,6 +5773,14 @@ components:
                     URL.
                   example: true
                   default: false
+                  type: boolean
+                useImprovedLayerSpec:
+                  description:
+                    Whether to always rewrite Cloudinary layers to the improved ImageKit
+                    layer specification (`l-image`, `l-text`, ..., `l-end`). When `false`
+                    or omitted, the improved specification is used only for transformations
+                    that require it.
+                  example: true
                   type: boolean
               required:
                 - type
@@ -9091,6 +9202,26 @@ components:
             Only works if the base asset is an image. See [gradient](https://imagekit.io/docs/effects-and-enhancements#gradient---e-gradient).
       additionalProperties: false
 
+    ContractUnits:
+      type: object
+      required:
+        - bandwidthBytes
+        - videoProcessingUnitsCount
+        - extensionUnitsCount
+        - purgeCacheRequests
+      properties:
+        bandwidthBytes:
+          type: integer
+          description: Bandwidth in bytes.
+        videoProcessingUnitsCount:
+          type: integer
+          description: Number of video processing units.
+        extensionUnitsCount:
+          type: integer
+          description: Number of extension units.
+        purgeCacheRequests:
+          type: integer
+          description: Number of purge cache requests.
     UsageAnalyticsResponse:
       type: object
       properties:
