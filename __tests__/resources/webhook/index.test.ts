@@ -10,7 +10,7 @@ describe('executeWebhook', () => {
 					operation: 'create',
 					endpoint: 'https://example.com/hook',
 					events: 'file.created, video.transformation.ready',
-					enabled: true,
+					additionalFields: { enabled: true },
 				},
 				httpResponse: mockResponse,
 			});
@@ -31,6 +31,31 @@ describe('executeWebhook', () => {
 				}),
 			);
 			expect(result).toEqual([{ json: mockResponse }]);
+		});
+
+		it('should omit optional fields when additionalFields is not set', async () => {
+			const context = createMockExecuteFunctions({
+				nodeParameters: {
+					operation: 'create',
+					endpoint: 'https://example.com/hook',
+					events: 'file.created',
+				},
+				httpResponse: { id: 'wh1' },
+			});
+
+			await executeWebhook.call(context, 0);
+
+			expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
+				'imagekitApi',
+				expect.objectContaining({
+					method: 'POST',
+					url: '/v1/accounts/webhooks',
+					body: {
+						endpoint: 'https://example.com/hook',
+						events: ['file.created'],
+					},
+				}),
+			);
 		});
 	});
 

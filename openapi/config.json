@@ -399,6 +399,7 @@
           "type": "boolean",
           "required": false,
           "default": true,
+          "topLevel": true,
           "description": "Whether to purge CDN cache for the old folder path"
         }
       }
@@ -790,6 +791,7 @@
           "type": "boolean",
           "required": false,
           "default": false,
+          "topLevel": true,
           "description": "Whether to copy all file versions"
         }
       }
@@ -843,6 +845,7 @@
           "type": "boolean",
           "required": false,
           "default": true,
+          "topLevel": true,
           "description": "Whether to purge CDN cache for the old file URL"
         }
       }

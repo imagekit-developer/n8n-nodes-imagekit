@@ -28,4 +28,9 @@ describe('ImagekitTrigger description', () => {
 		expect(imagekitApi?.required).toBe(true);
 		expect(imagekitApi?.displayOptions?.show?.autoWebhookSetup).toEqual([true]);
 	});
+
+	it('only surfaces the signature warning as a notice', () => {
+		const notices = description.properties.filter((p) => p.type === 'notice');
+		expect(notices.map((p) => p.name)).toEqual(['verifySignatureDisabledNotice']);
+	});
 });

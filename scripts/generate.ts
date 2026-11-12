@@ -85,6 +85,10 @@ interface ConfigField {
 	 *  API expects `name` in the body — set `bodyKey: "name"` on the
 	 *  `fieldName` entry. Only meaningful inside `bodyFields`. */
 	bodyKey?: string;
+	/** Only meaningful on optional bodyFields: keep the field on the main form
+	 *  instead of the Additional Fields collection. Set on parameters that
+	 *  shipped at the top level, so saved workflows keep resolving them. */
+	topLevel?: boolean;
 }
 
 interface ConfigPathParam {
@@ -214,6 +218,12 @@ function fieldRequired(f: ConfigField): boolean {
 	return f.required ?? true;
 }
 
+/** Optional bodyFields land in the op's Additional Fields collection unless
+ *  `topLevel` pins them to the main form. */
+function isAdditionalField(f: ConfigField): boolean {
+	return !fieldRequired(f) && !f.topLevel;
+}
+
 /** TS expression to read a field value from the n8n params at index `i`.
  *  Honors `transform` (currently only `csv`) and `type: 'json'`. */
 function fieldRead(name: string, f: ConfigField): string {
@@ -287,21 +297,44 @@ function emitOperationOptions(resource: string, ops: ResolvedOperation[], defaul
 	].join('\n');
 }
 
-function emitFieldNode(name: string, f: ConfigField, showConst: string): string {
+function emitFieldNode(
+	name: string,
+	f: ConfigField,
+	showConst: string,
+	{ indent = '\t', collectionOption = false } = {},
+): string {
+	const inner = `${indent}\t`;
 	return [
-		`\t{`,
-		`\t\tdisplayName: ${tsString(f.displayName)},`,
-		`\t\tname: ${tsString(name)},`,
-		`\t\ttype: ${tsString(fieldType(f))},`,
-		fieldRequired(f) ? `\t\trequired: true,` : null,
-		`\t\tdefault: ${fieldDefault(f)},`,
-		f.placeholder ? `\t\tplaceholder: ${tsString(f.placeholder)},` : null,
-		f.description ? `\t\tdescription: ${tsString(f.description)},` : null,
-		`\t\tdisplayOptions: { show: ${showConst} },`,
-		`\t},`,
+		`${indent}{`,
+		`${inner}displayName: ${tsString(f.displayName)},`,
+		`${inner}name: ${tsString(name)},`,
+		`${inner}type: ${tsString(fieldType(f))},`,
+		!collectionOption && fieldRequired(f) ? `${inner}required: true,` : null,
+		`${inner}default: ${fieldDefault(f)},`,
+		f.placeholder ? `${inner}placeholder: ${tsString(f.placeholder)},` : null,
+		f.description ? `${inner}description: ${tsString(f.description)},` : null,
+		collectionOption ? null : `${inner}displayOptions: { show: ${showConst} },`,
+		`${indent}},`,
 	]
 		.filter((l): l is string => l !== null)
 		.join('\n');
+}
+
+/** The op's optional bodyFields destined for the Additional Fields collection.
+ *  The execute code spreads the collection verbatim, so bodyKey/transform/json
+ *  can't be modelled there — those fields must set `topLevel: true`. */
+function additionalBodyFields(op: ResolvedOperation): Array<[string, ConfigField]> {
+	const out: Array<[string, ConfigField]> = [];
+	for (const [name, f] of Object.entries(op.cfg.bodyFields ?? {})) {
+		if (!isAdditionalField(f)) continue;
+		if (f.bodyKey || f.transform || fieldType(f) === 'json') {
+			throw new Error(
+				`Operation ${op.operationId}: optional body field "${name}" uses bodyKey/transform/json, which the additionalFields collection does not support; set topLevel: true`,
+			);
+		}
+		out.push([name, f]);
+	}
+	return out;
 }
 
 function emitFieldsForOp(resource: string, op: ResolvedOperation): string {
@@ -355,8 +388,32 @@ function emitFieldsForOp(resource: string, op: ResolvedOperation): string {
 		);
 	}
 	if (op.cfg.bodyFields) {
+		const additional = additionalBodyFields(op);
 		for (const [name, f] of Object.entries(op.cfg.bodyFields)) {
+			if (isAdditionalField(f)) continue;
 			blocks.push(emitFieldNode(name, f, showConst));
+		}
+		if (additional.length) {
+			additional.sort((a, b) => a[1].displayName.localeCompare(b[1].displayName));
+			blocks.push(
+				[
+					`\t{`,
+					`\t\tdisplayName: 'Additional Fields',`,
+					`\t\tname: 'additionalFields',`,
+					`\t\ttype: 'collection',`,
+					`\t\tplaceholder: 'Add Field',`,
+					`\t\tdefault: {},`,
+					`\t\tdisplayOptions: { show: ${showConst} },`,
+					`\t\toptions: [`,
+					additional
+						.map(([name, f]) =>
+							emitFieldNode(name, f, showConst, { indent: '\t\t\t', collectionOption: true }),
+						)
+						.join('\n'),
+					`\t\t],`,
+					`\t},`,
+				].join('\n'),
+			);
 		}
 	}
 
@@ -416,9 +473,17 @@ function emitExecuteCase(op: ResolvedOperation, baseURL: string): string {
 		bodyExpr = op.cfg.body.name;
 	} else if (op.cfg.bodyFields) {
 		const parts: string[] = [];
+		const additional = additionalBodyFields(op);
 		for (const [name, f] of Object.entries(op.cfg.bodyFields)) {
+			if (isAdditionalField(f)) continue;
 			lines.push(`\t\t\tconst ${name} = ${fieldRead(name, f)};`);
 			parts.push(f.bodyKey && f.bodyKey !== name ? `${f.bodyKey}: ${name}` : name);
+		}
+		if (additional.length) {
+			lines.push(
+				`\t\t\tconst additionalFields = this.getNodeParameter('additionalFields', i, {}) as IDataObject;`,
+			);
+			parts.push('...additionalFields');
 		}
 		bodyExpr = `{ ${parts.join(', ')} }`;
 	}

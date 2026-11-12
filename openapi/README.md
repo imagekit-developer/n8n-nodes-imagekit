@@ -66,7 +66,9 @@ The config supports these per-operation fields:
 
 Each typed field accepts `displayName`, `description`, `type` (`string` |
 `boolean` | `number` | `json`), `required`, `default`, and `placeholder`.
-Four optional modifiers cover non-uniform shapes:
+On `bodyFields`, an optional field (`required: false`) lands in an
+`Additional Fields` collection on the node unless `topLevel: true` keeps it
+on the main form. Five optional modifiers cover non-uniform shapes:
 
 | Modifier          | Where        | Effect                                                                                       |
 | ----------------- | ------------ | -------------------------------------------------------------------------------------------- |
@@ -74,6 +76,7 @@ Four optional modifiers cover non-uniform shapes:
 | `transform: "csv"`| bodyFields   | UI shows a string field; value is split on `,` and trimmed into `string[]` before sending    |
 | `bodyKey`         | bodyFields   | Aliases the body field name when it differs from the n8n UI parameter name                   |
 | `omitWhenDefault` | queryParams  | The value is only included in `qs` when it differs from `default` (e.g. optional bool flags) |
+| `topLevel`        | bodyFields   | Keeps an optional field on the main form instead of the `Additional Fields` collection       |
 
 ## Programmatic operations
 

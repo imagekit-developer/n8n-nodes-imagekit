@@ -94,12 +94,21 @@ export const namedTransformationDescription: INodeProperties[] = [
 		displayOptions: { show: showOnlyForNamedTransformationCreate },
 	},
 	{
-		displayName: 'Enabled',
-		name: 'enabled',
-		type: 'boolean',
-		default: true,
-		description: 'Whether the named transformation is enabled',
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
 		displayOptions: { show: showOnlyForNamedTransformationCreate },
+		options: [
+			{
+				displayName: 'Enabled',
+				name: 'enabled',
+				type: 'boolean',
+				default: true,
+				description: 'Whether the named transformation is enabled',
+			},
+		],
 	},
 	// Get
 	{
@@ -170,12 +179,12 @@ export async function executeNamedTransformation(
 		case 'create': {
 			const name = this.getNodeParameter('name', i) as string;
 			const transformation = this.getNodeParameter('transformation', i) as string;
-			const enabled = this.getNodeParameter('enabled', i) as boolean;
+			const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IDataObject;
 			options = {
 				method: 'POST',
 				baseURL: 'https://api.imagekit.io',
 				url: '/v1/named-transformations',
-				body: { name, transformation, enabled },
+				body: { name, transformation, ...additionalFields },
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,

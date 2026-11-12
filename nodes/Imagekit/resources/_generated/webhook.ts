@@ -95,12 +95,21 @@ export const webhookDescription: INodeProperties[] = [
 		displayOptions: { show: showOnlyForWebhookCreate },
 	},
 	{
-		displayName: 'Enabled',
-		name: 'enabled',
-		type: 'boolean',
-		default: true,
-		description: 'Whether the webhook is enabled',
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
 		displayOptions: { show: showOnlyForWebhookCreate },
+		options: [
+			{
+				displayName: 'Enabled',
+				name: 'enabled',
+				type: 'boolean',
+				default: true,
+				description: 'Whether the webhook is enabled',
+			},
+		],
 	},
 	// Get
 	{
@@ -171,12 +180,12 @@ export async function executeWebhook(
 		case 'create': {
 			const endpoint = this.getNodeParameter('endpoint', i) as string;
 			const events = (this.getNodeParameter('events', i) as string).split(',').map((s) => s.trim());
-			const enabled = this.getNodeParameter('enabled', i) as boolean;
+			const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IDataObject;
 			options = {
 				method: 'POST',
 				baseURL: 'https://api.imagekit.io',
 				url: '/v1/accounts/webhooks',
-				body: { endpoint, events, enabled },
+				body: { endpoint, events, ...additionalFields },
 			};
 			const responseData = await this.helpers.httpRequestWithAuthentication.call(
 				this,

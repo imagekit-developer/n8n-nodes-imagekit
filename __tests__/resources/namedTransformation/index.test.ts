@@ -10,7 +10,7 @@ describe('executeNamedTransformation', () => {
 					operation: 'create',
 					name: 'small_thumbnail',
 					transformation: 'w-150,h-150',
-					enabled: true,
+					additionalFields: { enabled: true },
 				},
 				httpResponse: mockResponse,
 			});
@@ -27,6 +27,28 @@ describe('executeNamedTransformation', () => {
 				}),
 			);
 			expect(result).toEqual([{ json: mockResponse }]);
+		});
+
+		it('should omit optional fields when additionalFields is not set', async () => {
+			const context = createMockExecuteFunctions({
+				nodeParameters: {
+					operation: 'create',
+					name: 'small_thumbnail',
+					transformation: 'w-150,h-150',
+				},
+				httpResponse: { id: 'nt1' },
+			});
+
+			await executeNamedTransformation.call(context, 0);
+
+			expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
+				'imagekitApi',
+				expect.objectContaining({
+					method: 'POST',
+					url: '/v1/named-transformations',
+					body: { name: 'small_thumbnail', transformation: 'w-150,h-150' },
+				}),
+			);
 		});
 	});
 

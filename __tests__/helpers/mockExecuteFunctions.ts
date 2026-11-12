@@ -32,11 +32,11 @@ export function createMockExecuteFunctions(
 	);
 
 	const context = {
-		getNodeParameter: jest.fn((param: string) => {
+		getNodeParameter: jest.fn((param: string, _itemIndex?: number, fallback?: unknown) => {
 			if (param in nodeParameters) {
 				return nodeParameters[param];
 			}
-			return '';
+			return fallback ?? '';
 		}),
 		helpers: {
 			httpRequestWithAuthentication,

@@ -72,26 +72,6 @@ export class ImagekitTrigger implements INodeType {
 			},
 		],
 		properties: [
-			// The notices sit before the toggle on purpose: n8n renders the
-			// credential picker right before the last parameter the credentials'
-			// displayOptions depend on (autoWebhookSetup), so this yields
-			// notice -> credential -> toggle in the panel.
-			{
-				displayName:
-					'The webhook is created in ImageKit automatically when this workflow is activated. This needs a <a href="https://imagekit.io/docs/api-keys" target="_blank">restricted API key</a> with webhook access; otherwise turn off "Automatic Webhook Setup".',
-				name: 'autoWebhookNotice',
-				type: 'notice',
-				default: '',
-				displayOptions: { show: { autoWebhookSetup: [true] } },
-			},
-			{
-				displayName:
-					'Create the webhook in the <a href="https://imagekit.io/dashboard/developer/webhooks" target="_blank">ImageKit dashboard</a> with the URL above, then paste its signing secret into the ImageKit Webhook API credential below.',
-				name: 'manualWebhookNotice',
-				type: 'notice',
-				default: '',
-				displayOptions: { show: { autoWebhookSetup: [false] } },
-			},
 			{
 				displayName: 'Automatic Webhook Setup',
 				name: 'autoWebhookSetup',
@@ -99,7 +79,7 @@ export class ImagekitTrigger implements INodeType {
 				default: false,
 				displayOptions: { show: { '@version': [1] } },
 				description:
-					'Whether n8n should create the webhook in ImageKit when this workflow is activated and remove it on deactivation. Requires a restricted API key with webhook access. Turn off if you created the webhook yourself in the ImageKit dashboard; you then supply its signing secret via an ImageKit Webhook API credential.',
+					'Whether n8n should create the webhook in ImageKit when this workflow is activated and remove it on deactivation. Requires a restricted API key with webhook access. Turn off if you created the webhook yourself in the ImageKit dashboard; you then supply its signing secret via an ImageKit Webhook API credential. See the <a href="https://github.com/imagekit-developer/n8n-nodes-imagekit#authentication" target="_blank">README</a> for setup details.',
 			},
 			{
 				displayName: 'Automatic Webhook Setup',
@@ -108,7 +88,7 @@ export class ImagekitTrigger implements INodeType {
 				default: true,
 				displayOptions: { show: { '@version': [2] } },
 				description:
-					'Whether n8n should create the webhook in ImageKit when this workflow is activated and remove it on deactivation. Requires a restricted API key with webhook access. Turn off if you created the webhook yourself in the ImageKit dashboard; you then supply its signing secret via an ImageKit Webhook API credential.',
+					'Whether n8n should create the webhook in ImageKit when this workflow is activated and remove it on deactivation. Requires a restricted API key with webhook access. Turn off if you created the webhook yourself in the ImageKit dashboard; you then supply its signing secret via an ImageKit Webhook API credential. See the <a href="https://github.com/imagekit-developer/n8n-nodes-imagekit#authentication" target="_blank">README</a> for setup details.',
 			},
 			{
 				displayName: 'Events',
