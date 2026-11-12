@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.1](https://github.com/imagekit-developer/n8n-nodes-imagekit/compare/1.1.0...1.1.1) (2026-11-12)
+
+### Bug Fixes
+
+* address n8n review feedback on trigger notices and optional fields ([a66388c](https://github.com/imagekit-developer/n8n-nodes-imagekit/commit/a66388ccda65d661b3ca18d359c222628c9b2fc2))
+
 ## [1.1.0](https://github.com/imagekit-developer/n8n-nodes-imagekit/compare/1.1.0-beta.0...1.1.0) (2026-10-26)
 
 ## [1.1.0-beta.0](https://github.com/imagekit-developer/n8n-nodes-imagekit/compare/1.0.6...1.1.0-beta.0) (2026-10-26)
