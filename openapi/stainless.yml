@@ -180,7 +180,9 @@ resources:
       CustomMetadataField: '#/components/schemas/CustomMetadataField'
     methods:
       create: post /v1/customMetadataFields
-      list: get /v1/customMetadataFields
+      list:
+        endpoint: get /v1/customMetadataFields
+        paginated: false
       update: patch /v1/customMetadataFields/{id}
       delete: delete /v1/customMetadataFields/{id}
 
@@ -235,7 +237,17 @@ resources:
 
   assets:
     methods:
-      list: get /v1/files
+      list:
+        endpoint: get /v1/files
+        paginated: false
+
+  tags:
+    models:
+      Tag: '#/components/schemas/Tag'
+    methods:
+      list:
+        endpoint: get /v1/tags
+        paginated: tag_cursor
 
   cache:
     subresources:
@@ -268,6 +280,11 @@ resources:
           RequestBandwidthEntry: '#/components/schemas/RequestBandwidthEntry'
         methods:
           get: get /v1/accounts/usage-analytics
+      contract:
+        models:
+          ContractUnits: '#/components/schemas/ContractUnits'
+        methods:
+          get: get /v1/accounts/contract
       origins:
         terraform: true
         models:
@@ -381,6 +398,28 @@ client_settings:
       read_env: IMAGEKIT_WEBHOOK_SECRET
       nullable: true
 
+pagination:
+  - name: tag_cursor
+    type: cursor
+    request:
+      cursor:
+        type: string
+        x-stainless-pagination-property:
+          purpose: next_cursor_param
+      limit:
+        type: integer
+    response:
+      tags:
+        type: array
+        items: {}
+        x-stainless-pagination-property:
+          purpose: items
+      nextCursor:
+        type: string
+        nullable: true
+        x-stainless-pagination-property:
+          purpose: next_cursor_field
+
 # `readme` is used to configure the code snippets that will be rendered in the
 # README.md of various SDKs. In particular, you can change the `headline`
 # snippet's endpoint and the arguments to call it with.
@@ -403,8 +442,6 @@ readme:
 
 diagnostics:
   ignored:
-    Pagination/NotConfigured:
-      - "#/pagination"
     ReadmeExample/MissingParam:
       - (resource) files > (method) upload
     Model/Recommended: true
